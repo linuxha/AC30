@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import kilib, customlib, netlist
 from sexp import q, dump, parse
 
-PROJECT = 'AC30'
+PROJECT = os.environ.get('AC30_PROJECT', 'AC30')    # AC30_SMT for the surface-mount variant
 NS = uuid.UUID('6f1d6c0e-5a3e-4c55-9d43-ac30ac30ac30')
 GRID = 2.54
 STUB = 2.54
@@ -308,6 +308,14 @@ Transcription notes / assumptions:
  - Trimmer R39 (DELAY, next to IC10 on the artwork) is not on any schematic; it is listed,\n   not placed, in tools/netlist.py.
  - J2 pins 11/12 (18 VAC A/B on the artwork) are unused: the power supply is external."""
 
+NOTES_SMT = """
+SMT variant (kicad-smt/AC30_SMT): every on-board part is surface mount except the Molex KK-396
+connectors and the mounting holes. 0805 R/C, SOD-123 diodes (1N4148W, BZT52C4V7), SOT-23
+transistors (MMBT5088 for 2N5210, MMBT5087), SOIC ICs, tantalum EIA-3216 (C4, C17),
+6.3x7.7 mm aluminium C16, Bourns 3314G trimmer R16, 1206 LED D18. RLY1/RLY2 are Omron
+G6K-2F-Y (5 V coil, DPDT 1 A, both poles in parallel as the motor contact) instead of
+6 V SIL reed relays; check the coil polarity mark (pin 1 to RELAY_x)."""
+
 NOTES_SUB = """Generated from docs/ac30_mod_demod.pdf (SWTPC AC-30 Cassette Tape Modulator/Demodulator
 Schematic). Connectivity is by net label: identical labels are connected.
 Transcription notes / assumptions:
@@ -336,10 +344,10 @@ Transcription notes / corrections:
 
 # Sub-sheets: (sheet key, file, title, sheet-symbol name, notes, title-block comment)
 SUBSHEETS = [
-    ('moddemod', 'AC30_moddemod_power.kicad_sch', 'SWTPC AC-30 - Modulator/Demodulator & power input',
+    ('moddemod', f'{PROJECT}_moddemod_power.kicad_sch', 'SWTPC AC-30 - Modulator/Demodulator & power input',
      'Mod/Demod & power input', 'NOTES_SUB',
      'Source: docs/ac30_mod_demod.pdf; power input J12 for the external supply'),
-    ('psu', 'AC30_power_supply.kicad_sch', 'SWTPC AC-30 - Power supply (external, not on PCB)',
+    ('psu', f'{PROJECT}_power_supply.kicad_sch', 'SWTPC AC-30 - Power supply (external, not on PCB)',
      'Power supply (external)', 'NOTES_PSU',
      'Source: docs/ac30_PS.pdf; parts have no footprints - built as a separate unit'),
 ]
@@ -375,10 +383,11 @@ def main(outdir):
     CUSTOM_LIB = os.path.join(outdir, 'AC30.kicad_sym')
     customlib.write(CUSTOM_LIB)
 
-    root = Sheet('main', 'AC30.kicad_sch', 'SWTPC AC-30 Cassette Interface - Switching', ['A1', 'A0'])
+    title = 'SWTPC AC-30 Cassette Interface - Switching' + (' (SMT)' if netlist.SMT else '')
+    root = Sheet('main', f'{PROJECT}.kicad_sch', title, ['A1', 'A0'])
     root_path = '/' + root.uuid
     layout(root, root_path, [p for p in netlist.parts if p['sheet'] == 'main'], wired=True, y0=60)
-    text(root, NOTES_MAIN, 20.32, 20.32)
+    text(root, NOTES_MAIN + (NOTES_SMT if netlist.SMT else ''), 20.32, 20.32)
 
     W, H = PAPERS[root.paper]
     sheet_syms, project_sheets = [], [[root.uuid, 'Root']]

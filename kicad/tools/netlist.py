@@ -8,7 +8,14 @@ A pin mapped to None gets a no-connect flag. Pins left out of a unit get a
 no-connect flag too, except on sheet "moddemod" where parts are unwired.
 """
 
+import os
+
 P5, G = '+5V', 'GND'
+
+# AC30_VARIANT=smt builds the surface-mount version (kicad-smt/AC30_SMT): every
+# on-board part is SMT except the Molex KK-396 connectors and the mounting holes.
+VARIANT = os.environ.get('AC30_VARIANT', 'tht')
+SMT = VARIANT == 'smt'
 
 # Footprints for parts that sit on the PC board.  Front-panel parts get none.
 FP = {
@@ -27,6 +34,23 @@ FP = {
     'RLY': 'Relay_THT:Relay_SPST_StandexMeder_SIL_Form1A',
     'LED': 'LED_THT:LED_D5.0mm',
 }
+if SMT:
+    FP.update({
+        'R': 'Resistor_SMD:R_0805_2012Metric',
+        'RT': 'Potentiometer_SMD:Potentiometer_Bourns_3314G_Vertical',
+        'C': 'Capacitor_SMD:C_0805_2012Metric',
+        'CP': 'Capacitor_Tantalum_SMD:CP_EIA-3216-18_Kemet-A',
+        'CPL': 'Capacitor_SMD:CP_Elec_6.3x7.7',
+        'D': 'Diode_SMD:D_SOD-123',
+        'Q': 'Package_TO_SOT_SMD:SOT-23',
+        'DIP8': 'Package_SO:SOIC-8_3.9x4.9mm_P1.27mm',
+        'DIP14': 'Package_SO:SOIC-14_3.9x8.7mm_P1.27mm',
+        'DIP16': 'Package_SO:SOIC-16_3.9x9.9mm_P1.27mm',
+        'RLY': 'Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y',
+        'LED': 'LED_SMD:LED_1206_3216Metric',
+    })
+# SMT part numbers for the through-hole semiconductors (same pinout roles)
+SMT_VALUE = {'1N4148': '1N4148W', '1N4732 4.7V': 'BZT52C4V7 4.7V'}
 
 parts = []
 
@@ -48,10 +72,17 @@ def CP(ref, value, pos, neg, group, fp='CP', sheet='main'):
 
 
 def D(ref, lib, value, k, a, group, fp='D', sheet='main'):
+    if SMT and fp:
+        value = SMT_VALUE.get(value, value)
     add(ref, lib, value, {1: {'1': k, '2': a}}, group, FP[fp] if fp else None, sheet)
 
 
 def Q(ref, pnp, e, b, c, group, sheet='main'):
+    if SMT:   # SOT-23 pads are 1 B, 2 E, 3 C; MMBT5088 stands in for the 2N5210
+        lib = 'Transistor_BJT:Q_PNP_BEC' if pnp else 'Transistor_BJT:Q_NPN_BEC'
+        add(ref, lib, 'MMBT5087' if pnp else 'MMBT5088', {1: {'1': b, '2': e, '3': c}}, group, FP['Q'],
+            sheet)
+        return
     lib = 'Transistor_BJT:Q_PNP_EBC' if pnp else 'Transistor_BJT:Q_NPN_EBC'
     add(ref, lib, '2N5087' if pnp else '2N5210', {1: {'1': e, '2': b, '3': c}}, group, FP['Q'], sheet)
 
@@ -198,10 +229,17 @@ Q('Q10', True, P5, 'Q10_B', 'READ_RLY_DRV', GRP)
 D('D6', 'Diode:1N4148', '1N4148', 'RELAY_1', 'MAN_MOTOR', GRP)
 D('D7', 'Diode:1N4148', '1N4148', 'RELAY_2', 'MAN_MOTOR', GRP)
 # Standex-Meder SIL reed relay: coil 5-3, contact 7-1
-add('RLY1', 'Relay:SILxx-1Axx-71x', '6V reed relay',
-    {1: {'5': 'RELAY_1', '3': G, '7': 'MOTOR_1A', '1': 'MOTOR_1B'}}, GRP, FP['RLY'])
-add('RLY2', 'Relay:SILxx-1Axx-71x', '6V reed relay',
-    {1: {'5': 'RELAY_2', '3': G, '7': 'MOTOR_2A', '1': 'MOTOR_2B'}}, GRP, FP['RLY'])
+if SMT:
+    # Omron G6K-2F-Y (5 V coil, 1 A): coil 1/8; both poles (COM 3/6, NO 4/5) in parallel
+    # as the normally-open motor contact; NC 2/7 unused.
+    for ref, drv, a, b in (('RLY1', 'RELAY_1', 'MOTOR_1A', 'MOTOR_1B'), ('RLY2', 'RELAY_2', 'MOTOR_2A', 'MOTOR_2B')):
+        add(ref, 'Relay:G6K-2', 'G6K-2F-Y 5V',
+            {1: {'1': drv, '8': G, '3': a, '6': a, '4': b, '5': b, '2': None, '7': None}}, GRP, FP['RLY'])
+else:
+    add('RLY1', 'Relay:SILxx-1Axx-71x', '6V reed relay',
+        {1: {'5': 'RELAY_1', '3': G, '7': 'MOTOR_1A', '1': 'MOTOR_1B'}}, GRP, FP['RLY'])
+    add('RLY2', 'Relay:SILxx-1Axx-71x', '6V reed relay',
+        {1: {'5': 'RELAY_2', '3': G, '7': 'MOTOR_2A', '1': 'MOTOR_2B'}}, GRP, FP['RLY'])
 add('IC10', 'Timer:NE555P', '555', {1: {
     '2': 'REC_EN', '3': 'DELAY_OUT', '4': P5, '5': 'IC10_CV', '6': 'DELAY_RC', '7': 'DELAY_RC'},
     0: {'1': G, '8': P5}}, GRP, FP['DIP8'])

@@ -315,6 +315,12 @@ def place(parts, pinnet, gap):
         rng.shuffle(o)
         orders.append(o)
     best = min(orders, key=lambda o: skyline(o, False)[0])
+    # Second pass: put the bottom connector row (J1, J2, J12) where that layout ends,
+    # so parts wired to it are pulled down towards it too, then search again.
+    _, bottom = skyline(best, False)
+    pack_rows(bot, x0 + hx, bottom, width - 2 * hx + 1, 2 * gap)
+    fixed.update({p.ref: centre(p) for p in bot})
+    best = min(orders, key=lambda o: skyline(o, False)[0])
     score, bottom = skyline(best, True)
     print(f'estimated signal wire {score - HEIGHT_W * bottom:.0f} mm', file=sys.stderr)
     pack_rows(bot, x0 + hx, bottom, width - 2 * hx + 1, 2 * gap)
@@ -359,7 +365,10 @@ def place_holes(parts, edge):
 def write(parts, netnames, out, edge):
     netcode = {n: i + 1 for i, n in enumerate(sorted(netnames))}
     ex1, ey1, ex2, ey2 = edge
-    s = [HEADER, '\t(net 0 "")']
+    header = HEADER
+    if os.environ.get('AC30_VARIANT') == 'smt':
+        header = header.replace('(reproduction)"', '(reproduction, SMT)"')
+    s = [header, '\t(net 0 "")']
     for n, i in sorted(netcode.items(), key=lambda kv: kv[1]):
         s.append(f'\t(net {i} {dump(n)})')
     for ref in sorted(parts, key=lambda r: (r.rstrip('0123456789'), int(r[len(r.rstrip('0123456789')):]))):

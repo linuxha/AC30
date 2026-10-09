@@ -1,6 +1,6 @@
 # AC-30 KiCad Schematic: Claude Code Session Log
 
-Session dates: 2026-10-08 to 2026-10-09 (sections 1–16 on the 8th, 17–29 on the 9th). Model: Claude Opus 5.5 (Claude Code CLI).
+Session dates: 2026-10-08 to 2026-10-09 (sections 1–16 on the 8th, 17–32 on the 9th). Model: Claude Opus 5.5 (Claude Code CLI).
 
 This is a record of the chat that produced the KiCad project in `kicad/`. User messages are reproduced exactly, typos included. Claude's answers are in full for sections 1–3 and condensed from section 4 on. Claude's intermediate tool work (shell commands, image crops, file edits) is summarized rather than shown verbatim.
 
@@ -513,6 +513,48 @@ Added sections 4–29 to this file and brought the appendix up to date.
 
 ---
 
+## 30. User
+
+> push all
+
+### Claude's answer (condensed)
+
+Committed everything pending as **`f60d9e7`** and pushed (`53b935b..f60d9e7`):
+- the session log (sections 4–29);
+- the user's `docs/AC30-BOM.md` edits, plus the new `docs/AC30-BOM.csv` and `docs/AC30_byte.pdf`;
+- `kicad/AC30.kicad_prl`, KiCad's change to which layers are visible;
+- the `kicad/.history` pointer.
+
+Claude flagged that `kicad/.history` was tracked as a nested repository (a gitlink) with no `.gitmodules`. GitHub stored only a pointer, so clones would get a broken, empty entry. Claude suggested untracking it.
+
+---
+
+## 31. User
+
+> untrack .history and push
+
+### Work done (summary)
+
+1. **Untracking.** `git rm --cached kicad/.history` removed it from the index and left the files on disk. This became commit **`1f0a4a8`**, pushed.
+2. **Missing `.gitignore`.** Git then listed `kicad/.history/` as untracked, because there was no root `.gitignore`. The commit where Claude had created one (section 10, `0bced8b`) was no longer in the history, probably after the history was reorganised, and the file was gone from disk.
+3. **New `.gitignore`.** It covers only KiCad's local files: `.history/`, `~*.lck` lock files, `_autosave-*` and `*-backups/`. `kicad/AC30.step` is left out because the user tracks it on purpose. This became commit **`139522e`**, pushed.
+
+### Claude's answer (condensed)
+
+`main` and `origin/main` are at `139522e`, and the working tree is clean. Claude noted that the message on `1f0a4a8` wrongly says `.history` was "already in .gitignore"; it wasn't until `139522e`.
+
+---
+
+## 32. User
+
+> update AC30-Claude.md with this session
+
+### Claude's answer
+
+Added sections 30–32 and updated the end-of-session table.
+
+---
+
 ## State at the end of the session
 
 | Item | State |
@@ -523,6 +565,7 @@ Added sections 4–29 to this file and brought the appendix up to date.
 | PCB | 173.5 × 122.0 mm, 2 layers, 119 through-hole footprints, fully routed; ERC, DRC and parity clean |
 | Connectors | J1–J5 match the original artwork; J12 is the new power input |
 | Mounting holes | 4 × 3.2 mm, 6.35 mm in from each corner |
+| Git | `main` = `origin/main`; root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
 | Build | `cd kicad && tools/build.sh`: regenerate, ERC, place, route (retry plus finishing passes), DRC, STEP export, FreeCAD check |
 | Tools | KiCad 10.0.7 AppImage, FreeRouting 2.1.0 (Java 22), FreeCAD 26.3.0 AppImage |
 | Reference | `AC30-settings.md`: rules, drill table, holes, connectors, placement |
