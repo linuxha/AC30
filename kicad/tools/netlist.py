@@ -63,11 +63,11 @@ def Q(ref, pnp, e, b, c, group, sheet='main'):
 # --------------------------------------------------------------------------
 GRP = 'Board connectors (pin positions per original artwork)'
 
-def conn(ref, value, nets, group=GRP):
+def conn(ref, value, nets, group=GRP, sheet='main'):
     n = len(nets)
     add(ref, f'Connector_Generic:Conn_01x{n:02d}', value,
         {1: {str(i + 1): net for i, net in enumerate(nets)}}, group,
-        f'Connector_Molex:Molex_KK-396_A-41791-{n:04d}_1x{n:02d}_P3.96mm_Vertical')
+        f'Connector_Molex:Molex_KK-396_A-41791-{n:04d}_1x{n:02d}_P3.96mm_Vertical', sheet)
 
 conn('J1', 'Front panel harness 1', ['MOTOR_1A', P5, 'LED_READ_DATA', G, 'RELAY_1', 'LED_REC_DATA',
                                      'MOTOR_1B', 'LOCAL_REMOTE', 'READ_RST', 'REC_RLY_DRV', 'MAN_MOTOR',
@@ -323,7 +323,7 @@ R('R22', '10K', P5, 'CLOCK_OUT', GRP, S)
 # Power supply, transcribed from docs/ac30_PS.pdf (SWTPC AC-30 Audio Cassette Power
 # Supply Schematic) - sheet 3.  Built as an EXTERNAL unit: no footprints, so these
 # parts are in the schematic and BOM but not on the PC board.  The board takes the
-# six DC outputs on through-hole pads TP1-TP6.
+# six DC outputs on J12, a 6-pin KK-396 header on the bottom edge.
 # --------------------------------------------------------------------------
 S = 'psu'
 GRP = 'Power supply (external): 120 VAC -> T1 -> bridge D14-D17 -> +/-13 V, zeners +/-7.5 V, 7805 +5 V'
@@ -348,14 +348,13 @@ add('R49', 'Device:R', '330', {1: {'1': '-7.5V', '2': '-13V'}}, GRP, None, S)
 D('D13', 'Device:D_Zener', '1N4737 7.5V', G, '-7.5V', GRP, fp=None, sheet=S)
 
 # --------------------------------------------------------------------------
-# Board side of the power supply: through-hole pads for the six DC outputs, and
-# the +5 V bypass capacitors (drawn at the regulator; on the PC board on the
-# original artwork, next to IC1, IC7 and IC13).
+# Board side of the power supply: J12, a 6-pin KK-396 header on the bottom edge
+# (same family as J1-J5) for the six DC outputs, and the +5 V bypass capacitors
+# (drawn at the regulator; on the PC board on the original artwork, next to IC1,
+# IC7 and IC13).
 # --------------------------------------------------------------------------
-PAD_FP = 'Connector_Wire:SolderWire-0.5sqmm_1x01_D0.9mm_OD2.1mm'
-GRP = 'Power input pads (from the external supply) and +5 V bypass'
-for i, net in enumerate((P5, G, '+13V', '-13V', '+7.5V', '-7.5V'), 1):
-    add(f'TP{i}', 'Connector:TestPoint', net, {1: {'1': net}}, GRP, PAD_FP, 'moddemod')
+GRP = 'Power input connector (from the external supply) and +5 V bypass'
+conn('J12', 'Power input', [G, P5, '+13V', '-13V', '+7.5V', '-7.5V'], GRP, 'moddemod')
 for c in ('C23', 'C24', 'C25'):
     C(c, '0.1uF', P5, G, GRP, 'moddemod')
 

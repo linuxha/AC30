@@ -50,8 +50,20 @@ if [ "${ROUTE:-1}" != 0 ]; then
     if [ "$best" -lt 0 ] || [ "$n" -lt "$best" ]; then best=$n; cp AC30.kicad_pcb "$OUT/best.kicad_pcb"; fi
     [ "$n" -eq 0 ] && break
   done
+  # Still not clean: finishing passes route only what is left on the best result
+  # (re-routing on top can add clearance errors, so each pass must pass DRC).
+  for pass in 1 2 3; do
+    [ "$best" -eq 0 ] && break
+    cp "$OUT/best.kicad_pcb" AC30.kicad_pcb
+    KICAD_CONFIG_HOME="$OUT/cfg" "$K" python3.11 tools/route.py AC30.kicad_pcb "$FR" 2>&1 |
+      grep -v '^swig/python' | sed "s/^/finish $pass: /"
+    cli pcb drc --schematic-parity -o "$OUT/drc_try.rpt" AC30.kicad_pcb >/dev/null
+    n=$(grep -c '^\[' "$OUT/drc_try.rpt" || true)
+    echo "finish $pass: $n DRC items"
+    if [ "$n" -lt "$best" ]; then best=$n; cp AC30.kicad_pcb "$OUT/best.kicad_pcb"; fi
+  done
   cp "$OUT/best.kicad_pcb" AC30.kicad_pcb
-  [ "$best" -eq 0 ] || echo "WARNING: no DRC-clean routing in ${ROUTE_ATTEMPTS:-4} attempts; kept the best ($best items)"
+  [ "$best" -eq 0 ] || echo "WARNING: no DRC-clean routing; kept the best ($best items)"
 fi
 cli pcb drc --schematic-parity -o "$OUT/drc.rpt" AC30.kicad_pcb | grep -E "Found" || true
 grep "^\[" "$OUT/erc.rpt" "$OUT/drc.rpt" | cut -d: -f2- | sort | uniq -c || true

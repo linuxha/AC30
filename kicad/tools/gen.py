@@ -317,12 +317,12 @@ Transcription notes / assumptions:
  - IC1B is unused and not drawn: its inputs are tied to GND, its outputs left open.
  - The manual's text calls the pulse inverter IC2A; the schematic (followed here) uses IC2C.
 Power input: the supply (sheet 3) is built as a separate unit. Its six DC outputs come onto
-the board on through-hole pads TP1-TP6. C23-C25 are +5 V bypass capacitors on the board
+the board on J12, a 6-pin KK-396 header (1 GND, 2 +5V, 3 +13V, 4 -13V, 5 +7.5V, 6 -7.5V). C23-C25 are +5 V bypass capacitors on the board
 (drawn at the regulator on docs/ac30_PS.pdf; next to IC1, IC7 and IC13 on the original artwork)."""
 
 NOTES_PSU = """Generated from docs/ac30_PS.pdf (SWTPC AC-30 Audio Cassette Power Supply Schematic).
 Built as an EXTERNAL unit: these parts have no footprints and are not on the PC board. Wire the
-six outputs (+5V, GND, +13V, -13V, +7.5V, -7.5V) to the board's power pads TP1-TP6.
+six outputs to the board's power input J12 (KK-396: 1 GND, 2 +5V, 3 +13V, 4 -13V, 5 +7.5V, 6 -7.5V).
 Transcription notes / corrections:
  - The drawing joins the IC16 GND / C23-C25 return line to the bridge's negative corner (-13 V)
    through two crossings. That would put the 7805's ground at -13 V, so IC16 GND is taken as GND.
@@ -338,7 +338,7 @@ Transcription notes / corrections:
 SUBSHEETS = [
     ('moddemod', 'AC30_moddemod_power.kicad_sch', 'SWTPC AC-30 - Modulator/Demodulator & power input',
      'Mod/Demod & power input', 'NOTES_SUB',
-     'Source: docs/ac30_mod_demod.pdf; power input pads TP1-TP6 for the external supply'),
+     'Source: docs/ac30_mod_demod.pdf; power input J12 for the external supply'),
     ('psu', 'AC30_power_supply.kicad_sch', 'SWTPC AC-30 - Power supply (external, not on PCB)',
      'Power supply (external)', 'NOTES_PSU',
      'Source: docs/ac30_PS.pdf; parts have no footprints - built as a separate unit'),

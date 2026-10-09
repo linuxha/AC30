@@ -187,7 +187,7 @@ def place(parts, pinnet, gap):
                 and not n.startswith('unconnected')}
 
     ics = sorted((r for r in parts if r.startswith('IC')), key=lambda r: int(r[2:]))
-    conns = [r for r in ('J3', 'J4', 'J5', 'J1', 'J2') if r in parts]
+    conns = [r for r in ('J3', 'J4', 'J5', 'J1', 'J2', 'J12') if r in parts]
     pads = sorted((r for r in parts if r.startswith('TP')), key=lambda r: int(r[2:]))
     holes = [r for r in parts if is_hole(r)]
     others = [r for r in parts if r not in ics + conns + pads + holes]
@@ -214,7 +214,7 @@ def place(parts, pinnet, gap):
             parts[r].rot = 90
 
     top = [parts[r] for r in conns if r in ('J3', 'J4', 'J5')]
-    bot = [parts[r] for r in conns if r in ('J1', 'J2')]
+    bot = [parts[r] for r in conns if r in ('J1', 'J2', 'J12')]     # J12: power input
     width = max(sum(p.size()[0] for p in top) + 2 * gap * (len(top) - 1),
                 sum(p.size()[0] for p in bot) + 2 * gap * (len(bot) - 1))
     # the connector rows start clear of the corner mounting holes
@@ -230,7 +230,8 @@ def place(parts, pinnet, gap):
               for ic in ics]
     if loose:
         blocks.append([parts[r] for r in loose])
-    blocks.append([parts[r] for r in pads])
+    if pads:
+        blocks.append([parts[r] for r in pads])
 
     # each block: choose the internal width that gives the smallest bounding area
     dims = []
