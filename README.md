@@ -36,7 +36,7 @@ After this I use a few suggested prompts.
 
 Here's what the inside of the Original SWTPC AC30:
 
-![SWTPC AC30 Cassette Interface insides](docs/ac30_back_640.jpg.jpg)
+![SWTPC AC30 Cassette Interface insides](images/ac30_back_640.jpg)
 
 Here's the schematics I gave it:
 ![SWTPC AC30 Cassette Interface schematic](docs/ac30_schematica.jpg)
