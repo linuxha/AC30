@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "AC30")(type "KiCad")(uri "${KIPRJMOD}/AC30.kicad_sym")(options "")(descr "AC-30 parts missing from stock libraries"))
+)
