@@ -1,6 +1,6 @@
 # AC-30 KiCad Schematic: Claude Code Session Log
 
-Session dates: 2026-10-08 to 2026-10-09 (sections 1–16 on the 8th, 17–32 on the 9th). Model: Claude Opus 5.5 (Claude Code CLI).
+Session dates: 2026-10-08 to 2026-10-09 (sections 1–16 on the 8th, 17–37 on the 9th). Model: Claude Opus 5.5 (Claude Code CLI).
 
 This is a record of the chat that produced the KiCad project in `kicad/`. User messages are reproduced exactly, typos included. Claude's answers are in full for sections 1–3 and condensed from section 4 on. Claude's intermediate tool work (shell commands, image crops, file edits) is summarized rather than shown verbatim.
 
@@ -555,6 +555,93 @@ Added sections 30–32 and updated the end-of-session table.
 
 ---
 
+## 33. User
+
+> Create a new Kicad schematic and PCB using SMT part except for the molex connectors. Keep the previous PCB and schematic
+
+### Work done (summary)
+
+1. **One set of tools, two variants.** Claude didn't copy the tools; it added a variant switch to them.
+   - `AC30_VARIANT=smt` changes the footprints and the part values in `netlist.py`.
+   - `AC30_PROJECT` sets the project and file names in `gen.py`.
+   - `tools/build.sh smt` writes a separate project, **`kicad-smt/AC30_SMT.*`**.
+   - Plain `tools/build.sh` still builds the through-hole project in `kicad/`. Regenerated into a scratch folder, its schematics matched the committed files apart from pin UUIDs that `kicad-cli` randomizes.
+2. **SMT parts.**
+   - 0805 resistors and capacitors, EIA-3216 tantalums for C4 and C17, and a 6.3 × 7.7 mm aluminium C16;
+   - SOD-123 diodes (1N4148W, BZT52C4V7), and SOT-23 transistors (MMBT5088 for the 2N5210, MMBT5087), using KiCad's `Q_*_BEC` symbols to match SOT-23 pad order;
+   - SOIC-8/14/16 ICs, a Bourns 3314G trimmer for R16 and a 1206 LED for D18.
+   - The KiCad library has no SMD reed relay, so RLY1/RLY2 became **Omron G6K-2F-Y** (5 V coil, DPDT 1 A), with both poles in parallel as the motor contact. Coil is pins 1/8, COM 3/6, NO 4/5.
+   - The Molex KK-396 connectors and the mounting holes stay through-hole.
+3. **Placement.** The board came out at 173.0 × 83.5 mm. ERC and parity were clean, and all 522 pins matched.
+
+### Claude's answer (condensed)
+
+The SMT schematic and placement were done and checked, and routing was started. Claude flagged three things: MMBT5088 stands in for the 2N5210; the G6K coil polarity should be checked; and 1206 parts would be easier to hand-solder.
+
+---
+
+## 34. User
+
+> ok, finish it and then commit
+
+## 35. User
+
+> ok, finish it and then commit
+
+### Work done (summary)
+
+1. **Routing failed.**
+   - Every FreeRouting 2.1.0 attempt left 22–26 connections unrouted, and the build hit its time limit.
+   - A 3 mm part gap (`PCB_GAP`, added to `build.sh`) still left 19.
+2. **First suspect: the stub cleanup.** `route.py`'s cleanup deleted tracks that end partway along another track (T-junctions). It was rewritten to count any same-net copper contact. That turned out not to be the main cause.
+3. **Root cause: FreeRouting 2.1.0.** Its log said **"0 incomplete"**, yet the session file it wrote had gaps. One missing TERM_RS232_OUT segment lay exactly on the line FreeRouting used for TERM_CLK_IN. A raw import, before any cleanup, already had 20 unrouted.
+   - Turning the optimizer off (`-mt 0`) made it worse: 30 unrouted.
+   - Protected finishing passes ran for 20 minutes without converging.
+4. **Fix: FreeRouting 2.4.1.**
+   - Its Linux bundle carries its own Java 25 runtime. It went to `~/bin/freerouting-2.4.1/`, with its checksum matching GitHub's.
+   - On the same board it reported **1 unrouted**, and KiCad imported exactly that.
+   - `route.py` runs its native launcher, and `build.sh` uses it by default.
+   - 2.4.1 is deterministic, so `build.sh` stops retrying when two attempts give the same result.
+5. **Last connection.** AUDIO_IN ran about 80 mm from J2 to R8/C5, because placement only weighed the top connector row. A **second placement pass** now fixes the bottom row (J1, J2, J12) at its provisional height, which pulls related parts towards it.
+6. **Finishing rounds.** When a board already has tracks, `route.py` marks them protected in the DSN, and rejects a session that drops existing wiring.
+
+### Claude's answer (condensed)
+
+The SMT board is **173.0 × 82.0 mm** and was **fully routed on the first attempt**:
+
+| Check | Result |
+|---|---|
+| ERC | 0 violations |
+| DRC | 0 violations at every severity |
+| Schematic parity | 0 issues |
+| FreeCAD check | OK |
+
+It has 1,710 segments, 288 vias and 416 SMD pads; the 68 connector pads are the only through-hole ones.
+
+Committed as **`942a3f1`**, with the tool changes and sections 30–32 of this log. The through-hole project's files were unchanged, and `AC30_SMT.kicad_prl` was left uncommitted.
+
+---
+
+## 36. User
+
+> push it
+
+### Claude's answer (condensed)
+
+Pushed `main` (`139522e..942a3f1`).
+
+---
+
+## 37. User
+
+> update AC30-Claude.md with this session
+
+### Claude's answer
+
+Added sections 33–37 and updated the end-of-session table.
+
+---
+
 ## State at the end of the session
 
 | Item | State |
@@ -562,12 +649,13 @@ Added sections 30–32 and updated the end-of-session table.
 | Schematic sheet 1 | Switching circuit (`docs/ac30_schematica.jpg`) |
 | Schematic sheet 2 | Modulator/demodulator (`docs/ac30_mod_demod.pdf`), power input J12, C23–C25 bypass, H1–H4 |
 | Schematic sheet 3 | Power supply (`docs/ac30_PS.pdf`), external: no footprints |
-| PCB | 173.5 × 122.0 mm, 2 layers, 119 through-hole footprints, fully routed; ERC, DRC and parity clean |
+| PCB, through-hole (`kicad/AC30.*`) | 173.5 × 122.0 mm, 2 layers, 119 through-hole footprints, fully routed; ERC, DRC and parity clean |
+| PCB, SMT (`kicad-smt/AC30_SMT.*`) | 173.0 × 82.0 mm, 2 layers, SMT except the KK-396 connectors and mounting holes, fully routed; ERC, DRC and parity clean |
 | Connectors | J1–J5 match the original artwork; J12 is the new power input |
 | Mounting holes | 4 × 3.2 mm, 6.35 mm in from each corner |
 | Git | `main` = `origin/main`; root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
-| Build | `cd kicad && tools/build.sh`: regenerate, ERC, place, route (retry plus finishing passes), DRC, STEP export, FreeCAD check |
-| Tools | KiCad 10.0.7 AppImage, FreeRouting 2.1.0 (Java 22), FreeCAD 26.3.0 AppImage |
+| Build | `cd kicad && tools/build.sh` (through-hole) or `tools/build.sh smt` (SMT): regenerate, ERC, place, route (retry plus finishing passes), DRC, STEP export, FreeCAD check |
+| Tools | KiCad 10.0.7 AppImage, FreeRouting 2.4.1 (bundled Java 25; the through-hole board was routed with 2.1.0), FreeCAD 26.3.0 AppImage |
 | Reference | `AC30-settings.md`: rules, drill table, holes, connectors, placement |
 | Not placed | R39 (200K DELAY trimmer), which is on no schematic |
 
