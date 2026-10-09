@@ -1,0 +1,51 @@
+ID	Part	Number
+R1	33K ohm 1/4 watt resistor	1
+R2, R3, R9, R11, R12, R15	10K ohm 1/4 watt resistor	6
+R19-R22, R27 R29, R32-R34	10K ohm 1/4 watt resistor	10
+R36, R40-R42, R44-R47	10K ohm 1/4 watt resistor	8
+R4, R48, R49	330 ohm 1/4 watt resistor	3
+R5 2.2K	ohm l/4 watt resistor    	1
+R6 4.7K	ohm 1/4 watt resistor    	1
+R7, R30, R31, R35, R37, R43	470 ohm 1/4 watt resistor	6
+R8, R17, R18, R23-R26	100K ohm 1/4 watt resistor	7
+R10	330K ohm 1/4 watt resistor	1
+R13, R14	22K ohm 1/4 watt resistor	2
+R16	20K ohm trimmer resistor 	1
+R38	47K ohm 1/4 watt resistor	1
+R39	200K ohm trimmer resistor	1
+C1, C6, C12-C15	1000 pfd capacitor       6             
+C2	2000 pfd capacitor    	1
+C3, C8	O.022 mfd capacitor	2
+C4	1 mfd @15 VDC electrolytic capacitor  	1
+C5, C18	0.01 mfd capacitor	2
+C7, C9	0.047 mfd capacitor	2
+C10	2700 pfd capacitor	1
+C11, C19, C20	470 pfd capacitor	3
+C16, C22	100 mfd @16 VDC electrolytic capacitor	2
+C17	10 mfd @10 VDC tantalum, capacitor	1
+C21	1000 mfd @25 VDC electrolytic capacitor	1
+C23-C25	0.1 mfd disc capacitor	3
+ICI, IC5, IC8	CD4013 dual D flip-flop	3
+IC2, IC11	4001 quad NOR gate	2
+IC3, IC13	4070 quad EX-OR gate	2
+IC4	4558 dual op amp	1
+IC6, IC14	CD4053 triple multiplexer	1
+IC7	4049 hex buffer	1
+IC9	4023 triple 3-input NAND gate	1
+IC10	555 timer	1
+IC12	1489 quad RS-232 receiver	1
+IC15	1488 quad RS-232 transmitter	1
+IC16	7805 5 VDC regulator	1
+D1, D2, D4, D5-D11	1N4148 silicon diode	9
+D3	4.7 volt zener diode 1N4732 or IN523	1
+D12, D13	7.5 volt zener diode 1N4737 or 1N523	2
+D14-D17	1N4003 silicon rectifier	4
+D18-D22	light emitting diode	5
+Q1, Q2, Q4-Q8	2N5210 NPN transistor	7
+Q3, Q9-Q11	2N5087 PNP transistor	4
+RLY1, RLY2	6 VDC reed relay	2
+S1-S3	DPDT miniature toggle switch	3
+S4, S5	SPDT center off miniature toggle switch	2
+S6, S7	SPDT miniature toggle switch	2
+T1	18 VAC @300 Ma. secondary 120/240 VAC  50-60 Hz primary power transformer	1
+F1	1 amp standard fuse	1
