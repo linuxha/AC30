@@ -1,0 +1,7 @@
+# KiCad local history (per-user)
+.history/
+
+# KiCad lock, autosave and backup files
+~*.lck
+_autosave-*
+*-backups/
