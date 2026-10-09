@@ -301,22 +301,72 @@ Transcription notes / assumptions:
  - Drawing pin-number slips corrected to the real pinouts: IC7D drawn 8->9 (4049: 9->10);\n   IC13C drawn inputs 7,8 (4070: 8,9).
  - 4053 INH (pin 6) and VEE (pin 7) are not shown on the drawing; tied to GND.
  - IC10 pins 4/8 tie to the R38 supply node, assumed +5V.
- - IC15 (1488) supply pins are not shown; brought out as V_RS232+ / V_RS232- (source on power sheet, unknown).
+ - IC15 (1488) supply pins are not shown; taken as +13V / -13V from the power supply (sheet 3).
  - CONTROL INVERT: drawn as R42 pull-up; it is also brought out on J4.
  - J1-J5 pin positions match the original artwork (docs/ac30_redblue150.jpg); J1 pin 15 is\n   unlabelled there and left unused.
  - MIC/EAR jack reference designators J6-J9 are assigned arbitrarily; J10/J11 are the motor jacks.
- - BOM switch S6 does not appear on the switching schematic (placed unwired on sheet 2)."""
+ - Trimmer R39 (DELAY, next to IC10 on the artwork) is not on any schematic; it is listed,\n   not placed, in tools/netlist.py.
+ - J2 pins 11/12 (18 VAC A/B on the artwork) are unused: the power supply is external."""
 
-NOTES_SUB = """The modulator/demodulator and power supply schematics are NOT in docs/ - only the
-switching schematic is. Until they are, the board brings every signal and supply
-that crosses into those circuits out to a labelled solder pad (TP1-TP15), so the
-switching section can be built and tested with an external mod/demod and supply.
-The mod/demod and power BOM parts are listed (not placed) in tools/netlist.py.
-Theory of operation (assembly manual): IC5B divides the 4800 Hz 16X clock, IC5A gives
-1200/2400 Hz, IC4A is a 2-pole filter; R5/C5 high-pass into comparator IC4B,
-D3 clamp, IC3C/D pulse generator, D4/C7 + IC3A carrier detect, Q2/IC2B missing
-pulse detector, R16 1200 Hz timer, IC1A data out, IC2D/IC3B 16X clock out.
-IC4 runs from +/-7.5 V zener (D12, D13) supplies; IC16 7805 makes +5 V from 18 VAC (T1)."""
+NOTES_SUB = """Generated from docs/ac30_mod_demod.pdf (SWTPC AC-30 Cassette Tape Modulator/Demodulator
+Schematic). Connectivity is by net label: identical labels are connected.
+Transcription notes / assumptions:
+ - IC4 (4558) supply pins are not drawn. The assembly manual says IC4 runs from the +/-7.5 V
+   zener rails (D12/D13 on the power supply sheet).
+ - R16's far end has a terminal dot with no label; taken as +5V (Q1/C8 timer pull-up).
+ - IC1B is unused and not drawn: its inputs are tied to GND, its outputs left open.
+ - The manual's text calls the pulse inverter IC2A; the schematic (followed here) uses IC2C.
+Power input: the supply (sheet 3) is built as a separate unit. Its six DC outputs come onto
+the board on through-hole pads TP1-TP6. C23-C25 are +5 V bypass capacitors on the board
+(drawn at the regulator on docs/ac30_PS.pdf; next to IC1, IC7 and IC13 on the original artwork)."""
+
+NOTES_PSU = """Generated from docs/ac30_PS.pdf (SWTPC AC-30 Audio Cassette Power Supply Schematic).
+Built as an EXTERNAL unit: these parts have no footprints and are not on the PC board. Wire the
+six outputs (+5V, GND, +13V, -13V, +7.5V, -7.5V) to the board's power pads TP1-TP6.
+Transcription notes / corrections:
+ - The drawing joins the IC16 GND / C23-C25 return line to the bridge's negative corner (-13 V)
+   through two crossings. That would put the 7805's ground at -13 V, so IC16 GND is taken as GND.
+ - T1's two 120 V primaries are drawn in parallel (120 VAC); drawn here as one primary. The
+   18 VAC secondary is centre-tapped, tap to GND: the bridge gives +13 V (C21) and -13 V (C22).
+ - D14-D17 numbering within the bridge is not shown on the drawing; assigned here.
+ - S6 is an SPDT toggle (BOM) used as an on/off switch; one throw is unused.
+ - IC15 (1488) supply pins are not drawn on the switching schematic; taken as +/-13 V, the only
+   load for those outputs. IC4 (4558) uses +/-7.5 V (assembly manual)."""
+
+
+# Sub-sheets: (sheet key, file, title, sheet-symbol name, notes, title-block comment)
+SUBSHEETS = [
+    ('moddemod', 'AC30_moddemod_power.kicad_sch', 'SWTPC AC-30 - Modulator/Demodulator & power input',
+     'Mod/Demod & power input', 'NOTES_SUB',
+     'Source: docs/ac30_mod_demod.pdf; power input pads TP1-TP6 for the external supply'),
+    ('psu', 'AC30_power_supply.kicad_sch', 'SWTPC AC-30 - Power supply (external, not on PCB)',
+     'Power supply (external)', 'NOTES_PSU',
+     'Source: docs/ac30_PS.pdf; parts have no footprints - built as a separate unit'),
+]
+
+
+def pwr_flags(sheet, path, nets):
+    """PWR_FLAGs for supplies that no power-output pin drives."""
+    W, H = PAPERS[sheet.paper]
+    gx, gy = snap(W - 110), snap(17.78)
+    for i, net in enumerate(nets):
+        x, y = gx - 40.64, gy + i * 10.16
+        Counter.n += 1
+        ref = '#FLG%02d' % (i + 1)
+        sheet.add(f'(symbol (lib_id "power:PWR_FLAG") (at {f(x)} {f(y)} 0) (unit 1) (exclude_from_sim no) '
+                  f'(in_bom yes) (on_board yes) (dnp no) (uuid {q(uid("flag", ref))}) '
+                  f'(property "Reference" {q(ref)} (at {f(x)} {f(y)} 0) {eff(hide=True)}) '
+                  f'(property "Value" "PWR_FLAG" (at {f(x)} {f(y - 3.81)} 0) {eff()}) '
+                  f'(property "Footprint" "" (at {f(x)} {f(y)} 0) {eff(hide=True)}) '
+                  f'(property "Datasheet" "" (at {f(x)} {f(y)} 0) {eff(hide=True)}) '
+                  f'(pin "1" (uuid {q(uid("flagpin", ref))})) '
+                  f'(instances (project {q(PROJECT)} (path {q(path)} (reference {q(ref)}) (unit 1)))))')
+        sheet.lib_ids.add('power:PWR_FLAG')
+        wire(sheet, x, y, x + 5.08, y)
+        if net in netlist.POWER:
+            place_power(sheet, path, net, x + 5.08, y, 0, 1 if net == 'GND' else -1)
+        else:
+            label(sheet, net, x + 5.08, y, 1, 0)
 
 
 def main(outdir):
@@ -326,68 +376,49 @@ def main(outdir):
     customlib.write(CUSTOM_LIB)
 
     root = Sheet('main', 'AC30.kicad_sch', 'SWTPC AC-30 Cassette Interface - Switching', ['A1', 'A0'])
-    sub = Sheet('moddemod', 'AC30_moddemod_power.kicad_sch',
-                'SWTPC AC-30 - Mod/Demod & Power interface pads', ['A3', 'A2', 'A1'])
-    sheet_uuid = uid('sheetsym', 'moddemod')
     root_path = '/' + root.uuid
-    sub_path = f'/{root.uuid}/{sheet_uuid}'
-
-    main_parts = [p for p in netlist.parts if p['sheet'] == 'main']
-    sub_parts = [p for p in netlist.parts if p['sheet'] == 'moddemod']
-
-    layout(root, root_path, main_parts, wired=True, y0=60)
+    layout(root, root_path, [p for p in netlist.parts if p['sheet'] == 'main'], wired=True, y0=60)
     text(root, NOTES_MAIN, 20.32, 20.32)
-    layout(sub, sub_path, sub_parts, wired=True, y0=60)
-    text(sub, NOTES_SUB, 20.32, 15.24)
 
-    # PWR_FLAGs: supplies come in through pads, so nothing on the board drives them
-    W, H = PAPERS[sub.paper]
-    gx, gy = snap(W - 110), snap(17.78)
-    for i, net in enumerate(['+5V', 'GND', 'V_RS232+', 'V_RS232-']):
-        x, y = gx - 40.64, gy + i * 10.16
-        Counter.n += 1
-        ref = '#FLG%02d' % (i + 1)
-        sub.add(f'(symbol (lib_id "power:PWR_FLAG") (at {f(x)} {f(y)} 0) (unit 1) (exclude_from_sim no) '
-                f'(in_bom yes) (on_board yes) (dnp no) (uuid {q(uid("flag", ref))}) '
-                f'(property "Reference" {q(ref)} (at {f(x)} {f(y)} 0) {eff(hide=True)}) '
-                f'(property "Value" "PWR_FLAG" (at {f(x)} {f(y - 3.81)} 0) {eff()}) '
-                f'(property "Footprint" "" (at {f(x)} {f(y)} 0) {eff(hide=True)}) '
-                f'(property "Datasheet" "" (at {f(x)} {f(y)} 0) {eff(hide=True)}) '
-                f'(pin "1" (uuid {q(uid("flagpin", ref))})) '
-                f'(instances (project {q(PROJECT)} (path {q(sub_path)} (reference {q(ref)}) (unit 1)))))')
-        sub.lib_ids.add('power:PWR_FLAG')
-        wire(sub, x, y, x + 5.08, y)
-        if net in netlist.POWER:
-            place_power(sub, sub_path, net, x + 5.08, y, 0, 1 if net == 'GND' else -1)
-        else:
-            label(sub, net, x + 5.08, y, 1, 0)
-
-    # sheet symbol on root
     W, H = PAPERS[root.paper]
-    sx, sy = W - 90, 22.86
-    sheet_sym = (f'(sheet (at {f(sx)} {f(sy)}) (size 60.96 15.24) (exclude_from_sim no) (in_bom yes) '
-                 f'(on_board yes) (dnp no) (fields_autoplaced yes) (stroke (width 0.1524) (type solid)) '
-                 f'(fill (color 0 0 0 0.0000)) (uuid {q(sheet_uuid)}) '
-                 f'(property "Sheetname" "Mod/Demod & Power pads" (at {f(sx)} {f(sy - 0.71)} 0) {eff("left bottom")}) '
-                 f'(property "Sheetfile" {q(sub.file)} (at {f(sx)} {f(sy + 15.95)} 0) {eff("left top")}) '
-                 f'(instances (project {q(PROJECT)} (path {q(root_path)} (page "2")))))')
-    comments = ['Source: docs/ac30_schematica.jpg, docs/AC30-BOM.md, docs/ac30_wiring1a.jpg',
+    sheet_syms, project_sheets = [], [[root.uuid, 'Root']]
+    for page, (key, file, title, symname, notes, comment) in enumerate(SUBSHEETS, 2):
+        sub = Sheet(key, file, title, ['A3', 'A2', 'A1'])
+        sheet_uuid = uid('sheetsym', key)
+        sub_path = f'/{root.uuid}/{sheet_uuid}'
+        layout(sub, sub_path, [p for p in netlist.parts if p['sheet'] == key], wired=True, y0=60)
+        text(sub, globals()[notes], 20.32, 15.24)
+        if key == 'psu':
+            # +5V is driven by IC16's output; the other rails only by diodes and zeners,
+            # and the mains plug's L pin is a power input
+            pwr_flags(sub, sub_path, ['GND', '+13V', '-13V', '+7.5V', '-7.5V', 'AC_LINE'])
+        write_sheet(os.path.join(outdir, file), sub, root.uuid, comments=[comment], sheet_instances=False)
+
+        sx, sy = W - 90, 22.86 + (page - 2) * 25.4
+        sheet_syms.append(
+            f'(sheet (at {f(sx)} {f(sy)}) (size 60.96 15.24) (exclude_from_sim no) (in_bom yes) '
+            f'(on_board yes) (dnp no) (fields_autoplaced yes) (stroke (width 0.1524) (type solid)) '
+            f'(fill (color 0 0 0 0.0000)) (uuid {q(sheet_uuid)}) '
+            f'(property "Sheetname" {q(symname)} (at {f(sx)} {f(sy - 0.71)} 0) {eff("left bottom")}) '
+            f'(property "Sheetfile" {q(file)} (at {f(sx)} {f(sy + 15.95)} 0) {eff("left top")}) '
+            f'(instances (project {q(PROJECT)} (path {q(root_path)} (page {q(str(page))})))))')
+        project_sheets.append([sheet_uuid, symname])
+
+    comments = ['Source: docs/ac30_schematica.jpg, docs/ac30_mod_demod.pdf, docs/ac30_PS.pdf, '
+                'docs/AC30-BOM.md, docs/ac30_redblue150.jpg',
                 'Generated by kicad/tools/gen.py - edit netlist.py and regenerate, or edit in KiCad']
-    write_sheet(os.path.join(outdir, root.file), root, root.uuid, sheet_sym, comments)
-    write_sheet(os.path.join(outdir, sub.file), sub, root.uuid,
-                comments=['Solder pads for the mod/demod and power supply (schematic not available in docs/)'],
-                sheet_instances=False)
+    write_sheet(os.path.join(outdir, root.file), root, root.uuid, '\n'.join(sheet_syms), comments)
 
     with open(os.path.join(outdir, 'sym-lib-table'), 'w') as fh:
         fh.write('(sym_lib_table\n  (version 7)\n  (lib (name "AC30")(type "KiCad")(uri "${KIPRJMOD}/AC30.kicad_sym")'
                  '(options "")(descr "AC-30 parts missing from stock libraries"))\n)\n')
+    import json
     pro = os.path.join(outdir, PROJECT + '.kicad_pro')
-    if not os.path.exists(pro):
-        import json
-        json.dump({"meta": {"filename": PROJECT + ".kicad_pro", "version": 3},
-                   "sheets": [[root.uuid, "Root"], [sheet_uuid, "Mod/Demod & Power"]]},
-                  open(pro, 'w'), indent=2)
-    print('main sheet paper', root.paper, 'sub sheet paper', sub.paper)
+    data = json.load(open(pro)) if os.path.exists(pro) else {"meta": {"filename": PROJECT + ".kicad_pro",
+                                                                        "version": 3}}
+    data['sheets'] = project_sheets
+    json.dump(data, open(pro, 'w'), indent=2)
+    print('main sheet paper', root.paper)
 
 
 if __name__ == '__main__':

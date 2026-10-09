@@ -2,12 +2,14 @@
 Run with the KiCad AppImage's python (needs its pcbnew module):
     kicad.AppImage python3.11 tools/route.py <board.kicad_pcb> <freerouting.jar> [passes]
 Each round exports a DSN (existing tracks included), routes it, imports the SES and
-removes the dangling stubs FreeRouting leaves behind. Rounds repeat until nothing is
-left unrouted or the round limit is reached. The board is saved in place."""
+removes the dangling stubs FreeRouting leaves behind. By default there is one round;
+ROUTE_ROUNDS=n re-routes on top of the earlier result, which can leave clearance
+errors, so build.sh instead retries from the unrouted board and keeps a DRC-clean
+result. The board is saved in place."""
 import os, subprocess, sys, tempfile
 import pcbnew
 
-ROUNDS = 3
+ROUNDS = int(os.environ.get('ROUTE_ROUNDS', 1))   # >1 re-routes on top of earlier rounds
 
 
 def connected_ends(board):

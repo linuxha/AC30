@@ -1,5 +1,7 @@
 """AC-30 netlist, transcribed from docs/ac30_schematica.jpg (switching section),
-docs/ac30_wiring1a.jpg (J1-J5 board connector signal order) and docs/AC30-BOM.md.
+docs/ac30_mod_demod.pdf (modulator/demodulator), docs/ac30_PS.pdf (power supply,
+built external to the board), docs/ac30_redblue150.jpg (J1-J5
+board connector pin positions) and docs/AC30-BOM.md.
 
 Each part: (ref, lib_id, value, {unit: {pin: net}}, group)
 A pin mapped to None gets a no-connect flag. Pins left out of a unit get a
@@ -42,16 +44,16 @@ def C(ref, value, a, b, group, sheet='main'):
 
 
 def CP(ref, value, pos, neg, group, fp='CP', sheet='main'):
-    add(ref, 'Device:C_Polarized', value, {1: {'1': pos, '2': neg}}, group, FP[fp], sheet)
+    add(ref, 'Device:C_Polarized', value, {1: {'1': pos, '2': neg}}, group, FP[fp] if fp else None, sheet)
 
 
 def D(ref, lib, value, k, a, group, fp='D', sheet='main'):
     add(ref, lib, value, {1: {'1': k, '2': a}}, group, FP[fp] if fp else None, sheet)
 
 
-def Q(ref, pnp, e, b, c, group):
+def Q(ref, pnp, e, b, c, group, sheet='main'):
     lib = 'Transistor_BJT:Q_PNP_EBC' if pnp else 'Transistor_BJT:Q_NPN_EBC'
-    add(ref, lib, '2N5087' if pnp else '2N5210', {1: {'1': e, '2': b, '3': c}}, group, FP['Q'])
+    add(ref, lib, '2N5087' if pnp else '2N5210', {1: {'1': e, '2': b, '3': c}}, group, FP['Q'], sheet)
 
 
 # --------------------------------------------------------------------------
@@ -72,7 +74,7 @@ conn('J1', 'Front panel harness 1', ['MOTOR_1A', P5, 'LED_READ_DATA', G, 'RELAY_
                                      'READ_RLY_DRV', 'RELAY_2', 'MOTOR_2A', None])
 conn('J2', 'Front panel harness 2', ['MOTOR_2B', 'READ_SET', 'REC_SET', 'REC_RST', 'LED_READ_RDY',
                                      'LED_REC_RDY', 'AUDIO_OUT', 'AUDIO_IN', 'CARRIER_EN_N', G,
-                                     '18VAC_A', '18VAC_B'])
+                                     None, None])     # 11/12 18 VAC A/B: supply is now external
 conn('J3', 'Computer interface (COMP)', [G, 'CPU_CLK_OUT', 'CPU_CLK_IN', None, 'CPU_RS232_IN',
                                          'CPU_RS232_OUT', None, None, None, None])
 conn('J4', 'Control interface', [None, G, None, 'LOCAL_REMOTE', 'STOP_RECORD', P5, 'STOP_READ',
@@ -96,7 +98,7 @@ add('IC15', 'AC30:MC1488', '1488', {
     2: {'4': None, '5': None, '6': None},
     3: {'9': 'TERM_ECHO', '10': 'TERM_TX_SEL', '8': 'TERM_RS232_IN'},  # drawing IC15A
     4: {'12': 'CPU_RX', '13': P5, '11': 'CPU_RS232_IN'},              # drawing IC15B
-    5: {'14': 'V_RS232+', '1': 'V_RS232-', '7': G}}, GRP, FP['DIP14'])
+    5: {'14': '+13V', '1': '-13V', '7': G}}, GRP, FP['DIP14'])
 C('C19', '470pF', 'TERM_RS232_IN', G, GRP)
 C('C20', '470pF', 'CPU_RS232_IN', G, GRP)
 D('D8', 'Diode:1N4148', '1N4148', P5, 'CPU_CLK_OUT', GRP)
@@ -239,72 +241,129 @@ for ref, val, tip, sl in (('J6', 'MIC A', 'MIC_A', G), ('J7', 'MIC B', 'MIC_B', 
     add(ref, 'Connector_Audio:AudioJack2', val, {1: {'T': tip, 'S': sl}}, GRP)
 
 # --------------------------------------------------------------------------
-# Modulator / demodulator and power supply BOM parts.  No schematic for these
-# is in docs/, so they are NOT placed (sheet 'omitted'); the board brings the
-# interface nets out to solder pads instead (see below).  Change S back to
-# 'moddemod' to place them once the circuit is known.
+# Modulator / demodulator, transcribed from docs/ac30_mod_demod.pdf
+# (SWTPC AC-30 Cassette Tape Modulator/Demodulator Schematic) - sheet 2.
 # --------------------------------------------------------------------------
-S = 'omitted'
-GRP = 'Mod/demod and power supply parts (BOM only - NOT WIRED, schematic not available)'
-add('IC1', '4xxx:4013', '4013', {1: {}, 2: {}, 3: {'14': P5, '7': G}}, GRP, FP['DIP14'], S)
-add('IC5', '4xxx:4013', '4013', {1: {}, 2: {}, 3: {'14': P5, '7': G}}, GRP, FP['DIP14'], S)
-add('IC2', '4xxx:4001', '4001', {1: {}, 2: {}, 3: {}, 4: {}, 5: {'14': P5, '7': G}}, GRP, FP['DIP14'], S)
-add('IC3', '4xxx:4070', '4070', {1: {}, 2: {}, 3: {}, 4: {}, 5: {'14': P5, '7': G}}, GRP, FP['DIP14'], S)
-add('IC4', 'Amplifier_Operational:RC4558', '4558', {1: {}, 2: {}, 3: {}}, GRP, FP['DIP8'], S)
-add('IC16', 'Regulator_Linear:L7805', '7805', {1: {'1': 'VRAW', '2': G, '3': P5}}, GRP, FP['REG'], S)
-for r, v in (('R1', '33K'), ('R2', '10K'), ('R3', '10K'), ('R4', '330'), ('R5', '2.2K'), ('R6', '4.7K'),
-             ('R7', '470'), ('R8', '100K'), ('R9', '10K'), ('R10', '330K'), ('R11', '10K'), ('R12', '10K'),
-             ('R13', '22K'), ('R14', '22K'), ('R15', '10K'), ('R17', '100K'), ('R18', '100K'),
-             ('R19', '10K'), ('R20', '10K'), ('R21', '10K'), ('R22', '10K'), ('R48', '330'), ('R49', '330')):
-    add(r, 'Device:R', v, {1: {}}, GRP, FP['R'], S)
-for r, v in (('R16', '20K trim'), ('R39', '200K trim')):
-    add(r, 'Device:R_Potentiometer_Trim', v, {1: {}}, GRP, FP['RT'], S)
-for c, v in (('C1', '1000pF'), ('C2', '2000pF'), ('C3', '0.022uF'), ('C5', '0.01uF'), ('C6', '1000pF'),
-             ('C7', '0.047uF'), ('C8', '0.022uF'), ('C9', '0.047uF'), ('C10', '2700pF'), ('C11', '470pF'),
-             ('C23', '0.1uF'), ('C24', '0.1uF'), ('C25', '0.1uF')):
-    add(c, 'Device:C', v, {1: {}}, GRP, FP['C'], S)
-add('C4', 'Device:C_Polarized', '1uF 15V', {1: {}}, GRP, FP['CP'], S)
-add('C21', 'Device:C_Polarized', '1000uF 25V', {1: {}}, GRP, FP['CPL'], S)
-add('C22', 'Device:C_Polarized', '100uF 16V', {1: {}}, GRP, FP['CPL'], S)
-for d in ('D1', 'D2', 'D4'):
-    add(d, 'Diode:1N4148', '1N4148', {1: {}}, GRP, FP['D'], S)
-add('D3', 'Device:D_Zener', '1N4732 4.7V', {1: {}}, GRP, FP['D'], S)
-add('D12', 'Device:D_Zener', '1N4737 7.5V', {1: {}}, GRP, FP['D'], S)
-add('D13', 'Device:D_Zener', '1N4737 7.5V', {1: {}}, GRP, FP['D'], S)
-for d in ('D14', 'D15', 'D16', 'D17'):
-    add(d, 'Diode:1N4003', '1N4003', {1: {}}, GRP, FP['DR'], S)
-for q in ('Q1', 'Q2', 'Q4'):
-    add(q, 'Transistor_BJT:Q_NPN_EBC', '2N5210', {1: {}}, GRP, FP['Q'], S)
-add('Q3', 'Transistor_BJT:Q_PNP_EBC', '2N5087', {1: {}}, GRP, FP['Q'], S)
-add('T1', 'Device:Transformer_1P_1S', '120/240V : 18VAC 300mA', {1: {}}, GRP, None, S)
-add('F1', 'Device:Fuse', '1A', {1: {}}, GRP, None, S)
-add('S6', 'Switch:SW_SPDT', 'SPDT (function not shown)', {1: {}}, GRP, None, S)
+S = 'moddemod'
+VP, VN = '+7.5V', '-7.5V'            # zener rails D12/D13 on the power supply
+
+GRP = 'Modulator: CLOCK IN /2 (IC5B), /1 or /2 by DATA IN (IC5A), 2-pole filter IC4A'
+add('IC5', '4xxx:4013', '4013', {
+    2: {'9': 'MOD_DIV2_N', '11': 'CLOCK_IN', '10': 'CARRIER_EN_N', '8': G,
+        '13': 'MOD_CLK2', '12': 'MOD_DIV2_N'},                              # IC5B
+    1: {'5': 'MOD_DIV4_N', '3': 'MOD_CLK2', '4': 'MOD_RST', '6': G,
+        '1': 'MOD_SQ', '2': 'MOD_DIV4_N'},                                  # IC5A
+    3: {'14': P5, '7': G}}, GRP, FP['DIP14'], S)
+add('IC2', '4xxx:4001', '4001', {
+    1: {'1': 'DATA_IN', '2': 'MOD_EDGE', '3': 'MOD_RST'},                  # IC2A
+    2: {'5': 'DEM_Q2C', '6': 'DEM_Q2C', '4': 'DEM_Q3B'},                   # IC2B
+    3: {'8': 'DEM_EDGE', '9': 'DEM_EDGE', '10': 'DEM_PULSE'},              # IC2C
+    4: {'12': 'DEM_PULSE', '13': 'DEM_BIT_EDGE', '11': 'DEM_CLK_N'},       # IC2D
+    5: {'14': P5, '7': G}}, GRP, FP['DIP14'], S)
+C('C1', '1000pF', 'MOD_CLK2', 'MOD_EDGE', GRP, S)
+R('R1', '33K', 'MOD_EDGE', P5, GRP, S)
+R('R2', '10K', 'MOD_SQ', 'MOD_F1', GRP, S)
+R('R3', '10K', 'MOD_F1', 'MOD_F2', GRP, S)
+C('C2', '2000pF', 'MOD_F2', G, GRP, S)
+C('C3', '0.022uF', 'MOD_F1', 'MOD_FB', GRP, S)
+add('IC4', 'Amplifier_Operational:RC4558', '4558', {
+    1: {'3': 'MOD_F2', '2': 'MOD_FILT', '1': 'MOD_FILT'},                  # IC4A follower
+    2: {'5': 'DEM_IN', '6': G, '7': 'DEM_CMP'},                            # IC4B comparator
+    3: {'8': VP, '4': VN}}, GRP, FP['DIP8'], S)
+R('R4', '330', 'MOD_FILT', 'MOD_FB', GRP, S)
+R('R5', '2.2K', 'MOD_FB', G, GRP, S)
+R('R6', '4.7K', 'MOD_FILT', 'MOD_ATTEN', GRP, S)
+R('R7', '470', 'MOD_ATTEN', G, GRP, S)
+CP('C4', '1uF 15V', 'MOD_ATTEN', 'AUDIO_OUT', GRP, sheet=S)
+
+GRP = 'Demodulator: comparator IC4B, edge pulses IC3C/D, carrier detect, data and 16X clock out'
+R('R8', '100K', 'AUDIO_IN', G, GRP, S)
+C('C5', '0.01uF', 'AUDIO_IN', 'DEM_HP', GRP, S)
+R('R9', '10K', 'DEM_HP', 'DEM_IN', GRP, S)
+D('D1', 'Diode:1N4148', '1N4148', 'DEM_IN', G, GRP, sheet=S)
+D('D2', 'Diode:1N4148', '1N4148', G, 'DEM_IN', GRP, sheet=S)
+R('R10', '330K', 'DEM_IN', 'DEM_CMP', GRP, S)                          # hysteresis
+R('R11', '10K', 'DEM_CMP', 'DEM_LIM', GRP, S)
+D('D3', 'Device:D_Zener', '1N4732 4.7V', 'DEM_LIM', G, GRP, sheet=S)
+add('IC3', '4xxx:4070', '4070', {
+    3: {'8': P5, '9': 'DEM_LIM', '10': 'DEM_INV'},                         # IC3C inverter
+    4: {'12': 'DEM_LIM', '13': 'DEM_DLY', '11': 'DEM_EDGE'},               # IC3D
+    1: {'1': 'DEM_CD', '2': 'DEM_CD', '3': 'CARRIER_DETECT'},              # IC3A
+    2: {'5': 'DEM_TIMER', '6': G, '4': 'DEM_BIT'},                         # IC3B buffer
+    5: {'14': P5, '7': G}}, GRP, FP['DIP14'], S)
+R('R12', '10K', 'DEM_INV', 'DEM_DLY', GRP, S)
+C('C6', '1000pF', 'DEM_DLY', G, GRP, S)
+R('R17', '100K', 'DEM_EDGE', 'DEM_D4', GRP, S)
+D('D4', 'Diode:1N4148', '1N4148', 'DEM_D4', 'DEM_CD', GRP, sheet=S)
+C('C7', '0.047uF', P5, 'DEM_CD', GRP, S)
+Q('Q3', True, P5, 'DEM_Q3B_R', 'DEM_CD', GRP, S)
+R('R19', '10K', 'DEM_Q3B', 'DEM_Q3B_R', GRP, S)
+R('R14', '22K', 'DEM_PULSE', 'DEM_Q2B', GRP, S)                         # missing-pulse detector
+Q('Q2', False, G, 'DEM_Q2B', 'DEM_Q2C', GRP, S)
+R('R18', '100K', P5, 'DEM_Q2C', GRP, S)
+C('C9', '0.047uF', 'DEM_Q2C', G, GRP, S)
+R('R13', '22K', 'DEM_PULSE', 'DEM_Q1B', GRP, S)                         # 1200 Hz timer
+Q('Q1', False, G, 'DEM_Q1B', 'DEM_TIMER', GRP, S)
+R('R15', '10K', 'DEM_TIMER', 'DEM_R16', GRP, S)
+add('R16', 'Device:R_Potentiometer_Trim', '20K trim', {1: {'1': 'DEM_R16', '2': P5, '3': P5}},
+    GRP, FP['RT'], S)
+C('C8', '0.022uF', 'DEM_TIMER', G, GRP, S)
+add('IC1', '4xxx:4013', '4013', {
+    1: {'5': 'DEM_BIT', '3': 'DEM_PULSE', '4': G, '6': G, '1': 'DATA_OUT', '2': None},  # IC1A
+    2: {'9': G, '11': G, '10': G, '8': G, '13': None, '12': None},                     # IC1B unused
+    3: {'14': P5, '7': G}}, GRP, FP['DIP14'], S)
+C('C10', '2700pF', 'DEM_BIT', 'DEM_BIT_EDGE', GRP, S)
+R('R20', '10K', 'DEM_BIT_EDGE', G, GRP, S)
+R('R21', '10K', 'DEM_CLK_N', 'DEM_Q4B', GRP, S)
+C('C11', '470pF', 'DEM_CLK_N', 'DEM_Q4B', GRP, S)
+Q('Q4', False, G, 'DEM_Q4B', 'CLOCK_OUT', GRP, S)
+R('R22', '10K', P5, 'CLOCK_OUT', GRP, S)
 
 # --------------------------------------------------------------------------
-# Solder pads for the off-board (not yet drawn) mod/demod and power supply
+# Power supply, transcribed from docs/ac30_PS.pdf (SWTPC AC-30 Audio Cassette Power
+# Supply Schematic) - sheet 3.  Built as an EXTERNAL unit: no footprints, so these
+# parts are in the schematic and BOM but not on the PC board.  The board takes the
+# six DC outputs on through-hole pads TP1-TP6.
+# --------------------------------------------------------------------------
+S = 'psu'
+GRP = 'Power supply (external): 120 VAC -> T1 -> bridge D14-D17 -> +/-13 V, zeners +/-7.5 V, 7805 +5 V'
+add('P1', 'Connector:Conn_Plug_2P', '120 VAC line cord', {1: {'1': 'AC_LINE', '2': 'AC_NEUTRAL'}}, GRP,
+    None, S)
+add('S6', 'Switch:SW_SPDT', 'POWER (SPDT, one throw used)', {1: {'2': 'AC_LINE', '1': 'AC_SW', '3': None}},
+    GRP, None, S)
+add('F1', 'Device:Fuse', '1A', {1: {'1': 'AC_NEUTRAL', '2': 'AC_FUSED'}}, GRP, None, S)
+# Both 120 V primaries are wired in parallel on the drawing (120 VAC operation); the
+# 18 VAC secondary is centre-tapped, with the tap to GND.
+add('T1', 'Device:Transformer_1P_SS', '120/240V : 18VAC CT 300mA',
+    {1: {'1': 'AC_SW', '2': 'AC_FUSED', '3': '18VAC_A', '4': G, '5': '18VAC_B'}}, GRP, None, S)
+for ref, k, a in (('D14', '+13V', '18VAC_A'), ('D15', '+13V', '18VAC_B'),
+                  ('D16', '18VAC_A', '-13V'), ('D17', '18VAC_B', '-13V')):
+    D(ref, 'Diode:1N4003', '1N4003', k, a, GRP, fp=None, sheet=S)
+CP('C21', '1000uF 25V', '+13V', G, GRP, fp=None, sheet=S)
+CP('C22', '100uF 16V', G, '-13V', GRP, fp=None, sheet=S)
+add('IC16', 'Regulator_Linear:L7805', '7805', {1: {'1': '+13V', '2': G, '3': P5}}, GRP, None, S)
+add('R48', 'Device:R', '330', {1: {'1': '+13V', '2': '+7.5V'}}, GRP, None, S)
+D('D12', 'Device:D_Zener', '1N4737 7.5V', '+7.5V', G, GRP, fp=None, sheet=S)
+add('R49', 'Device:R', '330', {1: {'1': '-7.5V', '2': '-13V'}}, GRP, None, S)
+D('D13', 'Device:D_Zener', '1N4737 7.5V', G, '-7.5V', GRP, fp=None, sheet=S)
+
+# --------------------------------------------------------------------------
+# Board side of the power supply: through-hole pads for the six DC outputs, and
+# the +5 V bypass capacitors (drawn at the regulator; on the PC board on the
+# original artwork, next to IC1, IC7 and IC13).
 # --------------------------------------------------------------------------
 PAD_FP = 'Connector_Wire:SolderWire-0.5sqmm_1x01_D0.9mm_OD2.1mm'
-GRP = 'Mod/demod interface pads'
-for i, (net, desc) in enumerate((
-        ('DATA_IN', 'DATA IN (to modulator)'),
-        ('CLOCK_IN', '16X CLOCK IN (to modulator)'),
-        ('CARRIER_EN_N', '~{CARRIER ENABLE} (to modulator)'),
-        ('AUDIO_OUT', 'AUDIO OUT (from modulator)'),
-        ('AUDIO_IN', 'AUDIO IN (to demodulator)'),
-        ('DATA_OUT', 'DATA OUT (from demodulator)'),
-        ('CLOCK_OUT', '16X CLOCK OUT (from demodulator)'),
-        ('CARRIER_DETECT', 'CARRIER DETECT (from demodulator)'),
-        (G, 'GND (mod/demod)')), 1):
-    add(f'TP{i}', 'Connector:TestPoint', desc, {1: {'1': net}}, GRP, PAD_FP, 'moddemod')
-GRP = 'Power supply pads'
-for i, (net, desc) in enumerate((
-        ('18VAC_A', '18 VAC A (from J2 / T1)'),
-        ('18VAC_B', '18 VAC B (from J2 / T1)'),
-        (P5, '+5V (regulated)'),
-        (G, 'GND (power)'),
-        ('V_RS232+', 'RS-232 V+ (IC15 pin 14)'),
-        ('V_RS232-', 'RS-232 V- (IC15 pin 1)')), 10):
-    add(f'TP{i}', 'Connector:TestPoint', desc, {1: {'1': net}}, GRP, PAD_FP, 'moddemod')
+GRP = 'Power input pads (from the external supply) and +5 V bypass'
+for i, net in enumerate((P5, G, '+13V', '-13V', '+7.5V', '-7.5V'), 1):
+    add(f'TP{i}', 'Connector:TestPoint', net, {1: {'1': net}}, GRP, PAD_FP, 'moddemod')
+for c in ('C23', 'C24', 'C25'):
+    C(c, '0.1uF', P5, G, GRP, 'moddemod')
+
+# --------------------------------------------------------------------------
+# BOM parts on neither schematic: listed, not placed.
+# --------------------------------------------------------------------------
+add('R39', 'Device:R_Potentiometer_Trim', '200K trim (DELAY)', {1: {}}, 'Not on any schematic', FP['RT'],
+    'omitted')
 
 # Corner mounting holes, 1/4" (6.35 mm) in from each edge as on the original artwork
 # (docs/ac30_redblue150.jpg); 3.2 mm unplated, for #4 or M3 screws. tools/pcb.py
@@ -317,6 +376,6 @@ for i in range(1, 5):
 # Nets that cross between the two sheets (drawn as global labels).
 GLOBAL = {'DATA_IN': 'input', 'DATA_OUT': 'output', 'CLOCK_IN': 'input', 'CLOCK_OUT': 'output',
           'CARRIER_DETECT': 'output', 'AUDIO_OUT': 'output', 'AUDIO_IN': 'input',
-          'CARRIER_EN_N': 'input', '18VAC_A': 'passive', '18VAC_B': 'passive',
-          'V_RS232+': 'passive', 'V_RS232-': 'passive', 'VRAW': 'passive'}
+          'CARRIER_EN_N': 'input', '+13V': 'passive', '-13V': 'passive',
+          '+7.5V': 'passive', '-7.5V': 'passive'}
 POWER = {P5: 'power:+5V', G: 'power:GND'}

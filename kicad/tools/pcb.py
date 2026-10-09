@@ -18,7 +18,7 @@ NS = uuid.UUID('6f1d6c0e-5a3e-4c55-9d43-ac30ac30ac31')
 BORDER = 3.0                       # mm between outermost courtyard and board edge
 ORIGIN = 30.0                      # board top-left on the drawing sheet
 HOLE_INSET = 6.35                  # mounting hole centres 1/4" in from each edge (artwork)
-POWER_NETS = {'+5V', 'GND', 'V_RS232+', 'V_RS232-', '18VAC_A', '18VAC_B'}
+POWER_NETS = {'+5V', 'GND', '+13V', '-13V', '+7.5V', '-7.5V'}
 SCH_FILE = {'/': 'AC30.kicad_sch'}
 
 
@@ -136,8 +136,16 @@ class Part:
             if isinstance(item, list) and item[0] == 'property':
                 if item[1] == 'Reference':
                     item[2] = self.ref
+                    if self.ref.startswith('TP'):        # power pads: only the rail name on silk
+                        layer = find1(item, 'layer')
+                        if layer is not None:
+                            layer[1] = 'F.Fab'
                 elif item[1] == 'Value':
                     item[2] = self.c['value']
+                    if self.ref.startswith('TP'):        # power pads: rail name on the silkscreen
+                        layer = find1(item, 'layer')
+                        if layer is not None:
+                            layer[1] = 'F.SilkS'
             if isinstance(item, list) and item[0] == 'pad':
                 net = self.nets.get(item[1])
                 item[:] = [x for x in item if not (isinstance(x, list) and x[0] == 'net')]
@@ -238,9 +246,9 @@ def place(parts, pinnet, gap):
         dims.append((members, w, h))
 
     # Wirelength model: signal-net pin positions, block pins relative to the block origin.
-    sig = {}
+    sig = {}                       # +5V and GND go everywhere; every other net counts
     for (r, _), n in pinnet.items():
-        if n not in POWER_NETS and not n.startswith('unconnected'):
+        if n not in ('+5V', 'GND') and not n.startswith('unconnected'):
             sig.setdefault(n, set()).add(r)
     sig = {n: rs for n, rs in sig.items() if len(rs) > 1}
 

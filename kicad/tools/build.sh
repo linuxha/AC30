@@ -15,8 +15,8 @@ OUT=$(mktemp -d)
 # Keep the AppImage mounted for the whole run to reach its libraries.
 coproc MNT { exec "$K" --appimage-mount; }
 read -r ROOT <&"${MNT[0]}"
-MPID=$MNT_PID
-trap 'kill $MPID 2>/dev/null || true; rm -rf "$OUT"' EXIT
+MPID=${MNT_PID:-}   # empty if a mount of this AppImage was already running
+trap 'if [ -n "$MPID" ]; then kill "$MPID" 2>/dev/null || true; fi; rm -rf "$OUT"' EXIT
 export KICAD_SYMBOL_DIR=$ROOT/share/kicad/symbols
 export KICAD_FOOTPRINT_DIR=$ROOT/share/kicad/footprints
 # Private config whose global library tables are the AppImage's own (KiCad 10
@@ -29,13 +29,29 @@ cli() { KICAD_CONFIG_HOME="$OUT/cfg" "$K" kicad-cli "$@"; }
 
 echo "kicad-cli $(cli version)  libraries: $ROOT/share/kicad"
 python3 -I tools/gen.py . >/dev/null
-for f in AC30.kicad_sch AC30_moddemod_power.kicad_sch; do cli sch upgrade "$f" >/dev/null; done
+for f in AC30.kicad_sch AC30_moddemod_power.kicad_sch AC30_power_supply.kicad_sch; do cli sch upgrade "$f" >/dev/null; done
 cli sch erc --exit-code-violations -o "$OUT/erc.rpt" AC30.kicad_sch | grep -i "violations" || true
 cli sch export netlist --format kicadsexpr -o "$OUT/AC30.net" AC30.kicad_sch >/dev/null
 python3 -I tools/pcb.py "$OUT/AC30.net" AC30.kicad_pcb | tee "$OUT/pcb.txt"
 cli pcb upgrade AC30.kicad_pcb >/dev/null
 if [ "${ROUTE:-1}" != 0 ]; then
-  KICAD_CONFIG_HOME="$OUT/cfg" "$K" python3.11 tools/route.py AC30.kicad_pcb "$FR" 2>&1 | grep -v '^swig/python'
+  # FreeRouting results vary from run to run: route the placed board afresh up to
+  # ROUTE_ATTEMPTS times and keep the first result with a completely clean DRC
+  # (or, failing that, the one with the fewest DRC items).
+  cp AC30.kicad_pcb "$OUT/placed.kicad_pcb"
+  best=-1
+  for attempt in $(seq 1 "${ROUTE_ATTEMPTS:-4}"); do
+    cp "$OUT/placed.kicad_pcb" AC30.kicad_pcb
+    KICAD_CONFIG_HOME="$OUT/cfg" "$K" python3.11 tools/route.py AC30.kicad_pcb "$FR" 2>&1 |
+      grep -v '^swig/python' | sed "s/^/attempt $attempt: /"
+    cli pcb drc --schematic-parity -o "$OUT/drc_try.rpt" AC30.kicad_pcb >/dev/null
+    n=$(grep -c '^\[' "$OUT/drc_try.rpt" || true)
+    echo "attempt $attempt: $n DRC items"
+    if [ "$best" -lt 0 ] || [ "$n" -lt "$best" ]; then best=$n; cp AC30.kicad_pcb "$OUT/best.kicad_pcb"; fi
+    [ "$n" -eq 0 ] && break
+  done
+  cp "$OUT/best.kicad_pcb" AC30.kicad_pcb
+  [ "$best" -eq 0 ] || echo "WARNING: no DRC-clean routing in ${ROUTE_ATTEMPTS:-4} attempts; kept the best ($best items)"
 fi
 cli pcb drc --schematic-parity -o "$OUT/drc.rpt" AC30.kicad_pcb | grep -E "Found" || true
 grep "^\[" "$OUT/erc.rpt" "$OUT/drc.rpt" | cut -d: -f2- | sort | uniq -c || true
