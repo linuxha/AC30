@@ -1,6 +1,6 @@
 ![SWTPC AC30 Cassette Interface](images/SWTPC_AC30_Cassette_Interface.jpg)
 
-# SWTPC AC30 Reporduction
+# SWTPC AC30 Reproduction
 A reproduction SWTPC AC-30 Cassette Interface
 
 ## Description
@@ -8,7 +8,7 @@ A reproduction SWTPC AC-30 Cassette Interface
 I have a couple of Motorola MC6800, MC6802, and MC6809 machines from the 1970's. And I wanted to
 setup a typical cassette plater/recorder setup to save and load code written on these machines.
 
-**Note:** 2026/10/08 - This is my go around with Claude, Kicad and FreeCAD and creating a PCB to be sent off as gerbers. I have a lot of inspecting to do. But for a 1st go this is scary impressive.
+**Note:** 2026/10/08 - This is my first go around with Claude, Kicad and FreeCAD and creating a PCB to be sent off as gerbers. I have a lot of inspecting to do. But for a 1st go this is scary impressive.
 
 ## Claude created Kicad files
 
@@ -42,7 +42,7 @@ I'd estimate the board to be about 9" x 9" (inches) in size. Here's the schemati
 
 ![SWTPC AC30 Cassette Interface schematic](docs/ac30_schematica.jpg)
 
-I gave it the [docs/AC30-BOM.md](BOM) file (simple markdown text file).
+I gave it the [AC30/docs/AC30-BOM.md](BOM) file (simple markdown text file).
 
 Claude started churning and created a 'schematic' (doesn't look like the above, hard to read) and I imported it into the PCB editor. Then didn't make any changes. Instead I let Claude do the rerouting.
 
