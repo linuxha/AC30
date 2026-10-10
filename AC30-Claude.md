@@ -1,6 +1,6 @@
 # AC-30 KiCad Schematic: Claude Code Session Log
 
-Session dates: 2026-10-08 to 2026-10-09 (sections 1–16 on the 8th, 17–37 on the 9th). Model: Claude Opus 5.5 (Claude Code CLI).
+Session dates: 2026-10-08 to 2026-10-10 (sections 1–16 on the 8th, 17–42 on the 9th, 43–47 on the 10th). Model: Claude Opus 5.5 (Claude Code CLI).
 
 This is a record of the chat that produced the KiCad project in `kicad/`. User messages are reproduced exactly, typos included. Claude's answers are in full for sections 1–3 and condensed from section 4 on. Claude's intermediate tool work (shell commands, image crops, file edits) is summarized rather than shown verbatim.
 
@@ -642,6 +642,113 @@ Added sections 33–37 and updated the end-of-session table.
 
 ---
 
+## 38. User
+
+> Create an AC30-SMT-settings.md for the SMT board
+
+### Claude's answer (condensed)
+
+Wrote `AC30-SMT-settings.md` in the same layout as `AC30-settings.md`: board, design rules, drill table (360 holes, mostly vias), SMD pads by footprint, routing result, mounting holes, power input, connectors, SMT parts with their through-hole equivalents, placement (centre and pin 1 for every part) and tool settings. All values were read from the board with KiCad's Python module.
+
+---
+
+## 39. User
+
+> push all
+
+### Claude's answer (condensed)
+
+Committed `994fc84` and pushed `main` (`000f242..994fc84`).
+
+---
+
+## 40. User
+
+> Modify the PCB so that it uses through hole jumpers for: Switches, LEDs, Motor Jacks, Ear and Mic
+
+### Work done (summary)
+
+1. **Asked two questions.** Which board: **SMT board only** (the through-hole board then still matched the artwork). Pad style: **labelled pad groups**, 0.1 in through-hole pads with net names on the silkscreen.
+2. **Netlist.** In the SMT variant the J1/J2 KK-396 harness headers were replaced by five `PinHeader_1x…_P2.54mm_Vertical` rows used as bare wire pads: J1 SWITCHES, J2 LEDS, J13 MOTOR, J14 MIC, J15 EAR.
+3. **Placement (`pcb.py`).** The pad rows are turned 90° along the bottom edge, with the courtyard used for placement extended over the labels. The bottom row now shares a bottom line (`pack_bottom`). Each pad gets a board-level silkscreen label with its net name (the "/" of local nets stripped), and the row name is the footprint's Value on the silkscreen.
+4. **Result.** 173.0 × 89.0 mm, fully routed on the first attempt, ERC/DRC/parity clean. `AC30-SMT-settings.md` and the SMT schematic note were updated.
+
+---
+
+## 41. User
+
+> ok, finish it and then commit
+
+### Claude's answer (condensed)
+
+Committed `ad90087`. The user's `docs/AC30-BOM.md` edits and the BOM CSVs in `kicad-smt/` were left out.
+
+---
+
+## 42. User
+
+> push it
+
+### Claude's answer (condensed)
+
+Pushed `main` (`e6db4e2..ad90087`).
+
+---
+
+## 43. User
+
+> I only see 1 Mic and one Ear. There should be a Mic A & Mic B, and Ear A & Ear B
+
+### Work done (summary)
+
+Each jack now has its own tip and GND pads: J14 MIC = MIC_A, GND, MIC_B, GND; J15 EAR = EAR_A, GND, EAR_B, GND. The RECORD A/B (S2) and PLAY A/B (S3) audio poles wire to six new SWITCHES pads (AUDIO_OUT, MIC_A, MIC_B, AUDIO_IN, EAR_A, EAR_B), so every wire has its own pad and the board joins the MIC_x/EAR_x pads of the two rows. J1 SWITCHES grew to 19 pads. The SMT board became 173.0 × 88.5 mm, fully routed and clean.
+
+---
+
+## 44. User
+
+> ok, finish it and then commit
+
+### Claude's answer (condensed)
+
+Committed `a90aefc`.
+
+---
+
+## 45. User
+
+> Modify other Kicad PCB so that these use through hole jumpers: Switches, LEDs, Motor Jacks, Ear and Mic
+
+### Work done (summary)
+
+1. **Netlist.** The jumper pad rows became common to both variants; the artwork's J1/J2 pin map was removed from the netlist and the schematic notes.
+2. **Board height.** At the default height weight (25) the through-hole placement put the bottom row at 148.5 mm: the search accepted a taller board to save wire. `build.sh` now sets `AC30_HEIGHT_W=60` for the through-hole build only, which gave 126.5 mm (the old 122 mm plus the labels). The SMT board was rebuilt too (schematic note changed) and came out identical apart from symbol IDs.
+3. **Result.** Through-hole board 173.0 × 126.5 mm. Each of the four routing attempts left one connection; the first finishing pass completed it. ERC/DRC/parity clean, FreeCAD check OK. `AC30-settings.md` was updated throughout.
+
+---
+
+## 46. User
+
+> ok, finish it and then commit
+
+### Claude's answer (condensed)
+
+Committed `6d04833`. The SMT project was open in KiCad (lock files), so the user was asked to reload it before saving.
+
+---
+
+## 47. User
+
+> update all the documentation and BOM for both
+
+### Work done (summary)
+
+1. **KiCad BOMs.** `build.sh` now exports `<project>-BOM.csv` from each schematic on every build: `kicad/AC30-BOM.csv` and `kicad-smt/AC30_SMT-BOM.csv` (reference, value, footprint, quantity, and "Excluded from board" for front-panel and power-supply parts).
+2. **Parts list.** `docs/AC30-BOM.md` keeps the original list and gains sections for the reproduction boards (KK-396 connectors, the wire pad rows, front-panel jacks, on-board C23–C25, mounting hardware), the SMT substitutions and the KiCad BOM files. `docs/AC30-BOM.csv` gained matching rows.
+3. **README and this log** updated.
+
+---
+
 ## State at the end of the session
 
 | Item | State |
@@ -649,25 +756,25 @@ Added sections 33–37 and updated the end-of-session table.
 | Schematic sheet 1 | Switching circuit (`docs/ac30_schematica.jpg`) |
 | Schematic sheet 2 | Modulator/demodulator (`docs/ac30_mod_demod.pdf`), power input J12, C23–C25 bypass, H1–H4 |
 | Schematic sheet 3 | Power supply (`docs/ac30_PS.pdf`), external: no footprints |
-| PCB, through-hole (`kicad/AC30.*`) | 173.5 × 122.0 mm, 2 layers, 119 through-hole footprints, fully routed; ERC, DRC and parity clean |
-| PCB, SMT (`kicad-smt/AC30_SMT.*`) | 173.0 × 82.0 mm, 2 layers, SMT except the KK-396 connectors and mounting holes, fully routed; ERC, DRC and parity clean |
-| Connectors | J1–J5 match the original artwork; J12 is the new power input |
+| PCB, through-hole (`kicad/AC30.*`) | 173.0 × 126.5 mm, 2 layers, 122 through-hole footprints, fully routed; ERC, DRC and parity clean |
+| PCB, SMT (`kicad-smt/AC30_SMT.*`) | 173.0 × 88.5 mm, 2 layers, SMT except the KK-396 connectors, wire pads and mounting holes, fully routed; ERC, DRC and parity clean |
+| Connectors | J3–J5 match the original artwork; J12 is the power input; the front panel wires to through-hole pads J1 SWITCHES, J2 LEDS, J13 MOTOR, J14 MIC, J15 EAR (both boards) |
 | Mounting holes | 4 × 3.2 mm, 6.35 mm in from each corner |
 | Git | `main` = `origin/main`; root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
-| Build | `cd kicad && tools/build.sh` (through-hole) or `tools/build.sh smt` (SMT): regenerate, ERC, place, route (retry plus finishing passes), DRC, STEP export, FreeCAD check |
-| Tools | KiCad 10.0.7 AppImage, FreeRouting 2.4.1 (bundled Java 25; the through-hole board was routed with 2.1.0), FreeCAD 26.3.0 AppImage |
-| Reference | `AC30-settings.md`: rules, drill table, holes, connectors, placement |
+| Build | `cd kicad && tools/build.sh` (through-hole) or `tools/build.sh smt` (SMT): regenerate, ERC, BOM export, place, route (retry plus finishing passes), DRC, STEP export, FreeCAD check |
+| Tools | KiCad 10.0.7 AppImage, FreeRouting 2.4.1 (bundled Java 25), FreeCAD 26.3.0 AppImage |
+| Reference | `AC30-settings.md` and `AC30-SMT-settings.md`: rules, drill table, holes, connectors and wire pads, placement; `docs/AC30-BOM.md` and the KiCad BOM CSVs |
 | Not placed | R39 (200K DELAY trimmer), which is on no schematic |
 
 ---
 
 ## Appendix: key nets
 
-The authoritative copy is `kicad/tools/netlist.py`. Key nets, named from the AC-30's point of view. Connector pin numbers are as on the final board, with J1–J5 matching the artwork (sections 5–6):
+The authoritative copy is `kicad/tools/netlist.py`. Key nets, named from the AC-30's point of view. Connector pin numbers are as on the final boards (J3–J5 match the artwork; J1/J2 are now the SWITCHES/LEDS wire pads, section 45):
 
 | Net | Connections |
 |---|---|
-| LOCAL_REMOTE | R41 (pull-up), S7, J1.8, J4.4, IC11D.13, IC11B.6, IC6.11, IC6.9, IC7E.11, IC14.10, IC14.11 |
+| LOCAL_REMOTE | R41 (pull-up), S7, J1.9, J4.4, IC11D.13, IC11B.6, IC6.11, IC6.9, IC7E.11, IC14.10, IC14.11 |
 | REMOTE_N | IC7E.12 → IC11A.1 |
 | READ_ACTIVE_N | IC9A.9 → IC11B.5, IC11A.2 |
 | SEL_CPU_CLK / SEL_TERM_CLK | IC11B.4 → IC6.10 / IC11A.3 → IC14.9 |
@@ -681,11 +788,11 @@ The authoritative copy is `kicad/tools/netlist.py`. Key nets, named from the AC-
 | CLOCK_IN (mod) | IC6.4 → IC5B C (pin 11) |
 | CPU_CLK_OUT / TERM_CLK_OUT | D8/D9 clamps, IC6.2, IC6.5 / D10/D11 clamps, IC14.5, IC6.3 |
 | CARRIER_DETECT | IC3A.3 (demod), IC9A.2, IC9B.4, J4.13 |
-| CARRIER_EN_N | R40 (from 555 out), S1 pole 1 (MAN → GND), J2.9, J4.14, IC5B R (pin 10) |
+| CARRIER_EN_N | R40 (from 555 out), S1 pole 1 (MAN → GND), J1.3, J4.14, IC5B R (pin 10) |
 | Latch set/reset | IC13 XOR (CTRL_INVERT common input) → C12/C13/C14/C15 → IC8 S/R; R23–R26, S4/S5; power-on reset via C16/D5/R27 |
 | Relay drive | Q9/Q10 collectors → S2/S3 A/B poles → RELAY_1/RELAY_2 → RLY1/RLY2 coils; MAN_MOTOR via D6/D7 |
 | Audio | AUDIO_OUT → S2 → MIC A/B; EAR A/B → S3 → AUDIO_IN |
 | DATA_OUT (demod) | IC1A Q (pin 1) → IC9.3 |
-| AUDIO_OUT / AUDIO_IN | C4 → J2.7 → S2 → MIC A/B; EAR A/B → S3 → J2.8 → R8, C5 |
+| AUDIO_OUT / AUDIO_IN | C4 → J1.10 → S2 → J1.11/J1.12 (MIC_A/B) → J14 → MIC A/B; EAR A/B → J15 → J1.18/J1.19 (EAR_A/B) → S3 → J1.17 → R8, C5 |
 | DEM_PULSE | IC2C out (pin 10) → IC1A C, IC2D.12, R13 (Q1 timer), R14 (Q2 missing-pulse) |
 | Power rails | J12: 1 GND, 2 +5V, 3 +13V (IC15.14), 4 −13V (IC15.1), 5 +7.5V (IC4.8), 6 −7.5V (IC4.4) |

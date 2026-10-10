@@ -1,6 +1,7 @@
 #!/bin/bash
 # Regenerate the schematic and PCB and run ERC/DRC using the KiCad AppImage
 # (its kicad-cli and its bundled symbol/footprint libraries).
+# <project>-BOM.csv is exported from the schematic.
 # The board is autorouted with FreeRouting (ROUTE=0 places only), then <project>.step
 # is exported and checked in FreeCAD (AppImage, headless freecadcmd).
 # Usage: tools/build.sh            through-hole board, kicad/AC30.*
@@ -46,6 +47,12 @@ python3 -I "$TOOLS/gen.py" . >/dev/null
 for f in "$P.kicad_sch" "${P}_moddemod_power.kicad_sch" "${P}_power_supply.kicad_sch"; do cli sch upgrade "$f" >/dev/null; done
 cli sch erc --exit-code-violations -o "$OUT/erc.rpt" "$P.kicad_sch" | grep -i "violations" || true
 cli sch export netlist --format kicadsexpr -o "$OUT/$P.net" "$P.kicad_sch" >/dev/null
+# BOM from the schematic: every part, with front-panel and power-supply parts marked
+# "Excluded from board"
+cli sch export bom -o "$P-BOM.csv" --ref-range-delimiter '' \
+  --fields 'Reference,Value,Footprint,${QUANTITY},${EXCLUDE_FROM_BOARD}' \
+  --labels 'Reference,Value,Footprint,Qty,Excluded from board' \
+  --group-by 'Value,Footprint,${EXCLUDE_FROM_BOARD}' "$P.kicad_sch" >/dev/null
 python3 -I "$TOOLS/pcb.py" "$OUT/$P.net" "$P.kicad_pcb" "${PCB_GAP:-2.0}" | tee "$OUT/pcb.txt"
 cli pcb upgrade "$P.kicad_pcb" >/dev/null
 if [ "${ROUTE:-1}" != 0 ]; then
