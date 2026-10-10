@@ -1,6 +1,6 @@
 # AC-30 KiCad Schematic: Claude Code Session Log
 
-Session dates: 2026-10-08 to 2026-10-10 (sections 1–16 on the 8th, 17–42 on the 9th, 43–68 on the 10th). Model: Claude Opus 5.5 (Claude Code CLI).
+Session dates: 2026-10-08 to 2026-10-10 (sections 1–16 on the 8th, 17–42 on the 9th, 43–70 on the 10th). Model: Claude Opus 5.5 (Claude Code CLI).
 
 This is a record of the chat that produced the KiCad project in `kicad/`. User messages are reproduced exactly, typos included. Claude's answers are in full for sections 1–3 and condensed from section 4 on. Claude's intermediate tool work (shell commands, image crops, file edits) is summarized rather than shown verbatim.
 
@@ -1027,7 +1027,27 @@ Committed `8bf9a8b` and pushed (`6272608..8bf9a8b`). `kicad/AC30.kicad_prl` (KiC
 
 ### Claude's answer
 
-Added sections 66–68, committed and pushed.
+Added sections 66–68, committed `c1535ba` and pushed (`8bf9a8b..c1535ba`).
+
+---
+
+## 69. User
+
+> update the README with this session, commit and push
+
+### Claude's answer (condensed)
+
+Added one sentence to the README's 2026/10/10 note: the motor and relay lines now use the same 0.6 mm tracks as the power rails, good for roughly 1.5 A. Committed `77b0c25` and pushed (`c1535ba..77b0c25`).
+
+---
+
+## 70. User
+
+> update AC30-Claude.md with this session, commit and push
+
+### Claude's answer
+
+Added sections 69–70, committed and pushed.
 
 ---
 
@@ -1042,7 +1062,7 @@ Added sections 66–68, committed and pushed.
 | PCB, SMT (`kicad-smt/AC30_SMT.*`) | 173.0 × 88.5 mm, 2 layers, SMT except the KK-396 connectors, wire pads and mounting holes, fully routed, GND fill on both layers; ERC, DRC and parity clean |
 | Connectors | J3–J5 match the original artwork; J12 is the power input; the front panel wires to through-hole pads J1 SWITCHES, J2 LEDS, J13 MOTOR, J14 MIC, J15 EAR (both boards) |
 | Mounting holes | 4 × 3.2 mm, 6.35 mm in from each corner |
-| Git | `main` = `origin/main` (pushed after section 68); root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
+| Git | `main` = `origin/main` (pushed after section 70); root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
 | Build | `cd kicad && tools/build.sh` (through-hole) or `tools/build.sh smt` (SMT): regenerate, ERC, BOM export, place (seeds tried in turn until routing is clean: 31 through-hole, 30 SMT), route (retries plus targeted finishing passes), GND fill (`tools/zones.py`), DRC, STEP export, FreeCAD check, Gerbers and drill files (`tools/gerbers.sh`) |
 | Tools | KiCad 10.0.7 AppImage, FreeRouting 2.4.1 (bundled Java 25), FreeCAD 26.3.0 AppImage |
 | Reference | `AC30-settings.md` and `AC30-SMT-settings.md`: rules, drill table, holes, connectors and wire pads, placement; `docs/AC30-BOM.md` and the KiCad BOM CSVs |
