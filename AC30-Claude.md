@@ -1,6 +1,6 @@
 # AC-30 KiCad Schematic: Claude Code Session Log
 
-Session dates: 2026-10-08 to 2026-10-10 (sections 1–16 on the 8th, 17–42 on the 9th, 43–61 on the 10th). Model: Claude Opus 5.5 (Claude Code CLI).
+Session dates: 2026-10-08 to 2026-10-10 (sections 1–16 on the 8th, 17–42 on the 9th, 43–65 on the 10th). Model: Claude Opus 5.5 (Claude Code CLI).
 
 This is a record of the chat that produced the KiCad project in `kicad/`. User messages are reproduced exactly, typos included. Claude's answers are in full for sections 1–3 and condensed from section 4 on. Claude's intermediate tool work (shell commands, image crops, file edits) is summarized rather than shown verbatim.
 
@@ -935,7 +935,58 @@ Committed `e0abbaa` and pushed (`97f89f4..e0abbaa`). The through-hole board was 
 
 ### Claude's answer
 
-Added sections 56–61, committed and pushed.
+Added sections 56–61, committed `a4ef5d3` and pushed (`e0abbaa..a4ef5d3`).
+
+---
+
+## 62. User
+
+> update the README with this session, commit and push
+
+### Claude's answer (condensed)
+
+Added a paragraph to the README's 2026/10/10 note covering three things: the SMT position file, the through-hole re-placement (with the build now trying other placements on its own), and a pointer to the known issues in section 58. Committed `87c5ddc` and pushed (`a4ef5d3..87c5ddc`).
+
+---
+
+## 63. User
+
+> y
+
+### Claude's answer (condensed)
+
+There was no open question. Claude offered the next open items: a ground fill, Power-class motor/relay tracks, and checking the transcription assumptions.
+
+---
+
+## 64. User
+
+> add a ground fill to both boards, update docs, commit & push
+
+### Work done (summary)
+
+1. **`kicad/tools/zones.py`.** Adds one GND zone on F.Cu and B.Cu over the board outline: 0.3 mm clearance, 0.25 mm minimum width, thermal reliefs (0.5 mm gap, 0.5 mm spokes), islands removed. It is written unfilled and filled by `kicad-cli pcb drc --refill-zones --save-board`.
+2. **Starved thermals.** The first fill gave 10 (through-hole) and 2 (SMT) starved-thermal errors: GND pads whose relief had only a spoke into an isolated scrap of fill.
+   - A one-spoke design rule did not help.
+   - Smaller thermal gaps did not help.
+   - Solid connections everywhere were clean, but were rejected: harder hand soldering, and tombstoning risk on small SMD parts.
+   - Fix: `zones.py --solid` gives only the reported pads a solid connection, and `build.sh` refills until none is left. Through-hole: 11 pads in three rounds (IC5.6/7/8, IC9.7, J4.2, Q4.1, Q5.1, Q8.1, R20.2, R23.2, R24.2). SMT: J4.2 and J14.2.
+3. **`build.sh`.** Runs the fill after routing (`FILL=0` skips it). Both boards were rebuilt: ERC/DRC at every severity and parity clean, routing and size unchanged, Gerbers regenerated.
+4. **Docs.** Both settings documents gained a "GND copper fill" section, and the board table no longer says "None". The README note mentions the fill.
+
+### Claude's answer (condensed)
+
+Committed `fbcc017` and pushed (`87c5ddc..fbcc017`).
+
+---
+
+## 65. User
+
+> update AC30-Claude.md with this session, commit and push
+
+### Claude's answer
+
+Added sections 62–65, committed and pushed.
 
 ---
 
@@ -946,12 +997,12 @@ Added sections 56–61, committed and pushed.
 | Schematic sheet 1 | Switching circuit (`docs/ac30_schematica.jpg`) |
 | Schematic sheet 2 | Modulator/demodulator (`docs/ac30_mod_demod.pdf`), power input J12, C23–C25 bypass, H1–H4 |
 | Schematic sheet 3 | Power supply (`docs/ac30_PS.pdf`), external: no footprints |
-| PCB, through-hole (`kicad/AC30.*`) | 173.0 × 126.5 mm, 2 layers, 122 through-hole footprints, fully routed; ERC, DRC and parity clean |
-| PCB, SMT (`kicad-smt/AC30_SMT.*`) | 173.0 × 88.5 mm, 2 layers, SMT except the KK-396 connectors, wire pads and mounting holes, fully routed; ERC, DRC and parity clean |
+| PCB, through-hole (`kicad/AC30.*`) | 173.0 × 126.5 mm, 2 layers, 122 through-hole footprints, fully routed, GND fill on both layers; ERC, DRC and parity clean |
+| PCB, SMT (`kicad-smt/AC30_SMT.*`) | 173.0 × 88.5 mm, 2 layers, SMT except the KK-396 connectors, wire pads and mounting holes, fully routed, GND fill on both layers; ERC, DRC and parity clean |
 | Connectors | J3–J5 match the original artwork; J12 is the power input; the front panel wires to through-hole pads J1 SWITCHES, J2 LEDS, J13 MOTOR, J14 MIC, J15 EAR (both boards) |
 | Mounting holes | 4 × 3.2 mm, 6.35 mm in from each corner |
-| Git | `main` = `origin/main` (pushed after section 61); root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
-| Build | `cd kicad && tools/build.sh` (through-hole) or `tools/build.sh smt` (SMT): regenerate, ERC, BOM export, place (seeds tried in turn until routing is clean: 31 through-hole, 30 SMT), route (retries plus targeted finishing passes), DRC, STEP export, FreeCAD check, Gerbers and drill files (`tools/gerbers.sh`) |
+| Git | `main` = `origin/main` (pushed after section 65); root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
+| Build | `cd kicad && tools/build.sh` (through-hole) or `tools/build.sh smt` (SMT): regenerate, ERC, BOM export, place (seeds tried in turn until routing is clean: 31 through-hole, 30 SMT), route (retries plus targeted finishing passes), GND fill (`tools/zones.py`), DRC, STEP export, FreeCAD check, Gerbers and drill files (`tools/gerbers.sh`) |
 | Tools | KiCad 10.0.7 AppImage, FreeRouting 2.4.1 (bundled Java 25), FreeCAD 26.3.0 AppImage |
 | Reference | `AC30-settings.md` and `AC30-SMT-settings.md`: rules, drill table, holes, connectors and wire pads, placement; `docs/AC30-BOM.md` and the KiCad BOM CSVs |
 | Fabrication | `kicad/gerbers/` + `kicad/AC30-gerbers.zip`; `kicad-smt/gerbers/` + `kicad-smt/AC30_SMT-gerbers.zip`; SMT pick-and-place `kicad-smt/AC30_SMT-top-pos.csv` (origin bottom-left) |
