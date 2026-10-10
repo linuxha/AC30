@@ -383,6 +383,8 @@ How the layout is built:
 | `AC30-PTH.drl`, `AC30-NPTH.drl` | Excellon drill files in mm: 572 plated holes, 4 unplated (mounting holes) |
 | `*-drl_map.pdf`, `AC30-drill-report.txt` | Drill maps and the drill report |
 
+The board's drill/place origin is its bottom-left corner, (30, 156) in KiCad page coordinates. The Gerbers and drill files use absolute coordinates.
+
 ### 3D model
 
 `kicad/AC30.step` is exported on every build. Git ignores it.

@@ -405,6 +405,8 @@ def write(parts, netnames, out, edge):
     header = HEADER
     if os.environ.get('AC30_VARIANT') == 'smt':
         header = header.replace('(reproduction)"', '(reproduction, SMT)"')
+    # drill/place origin at the board's bottom-left corner (position files)
+    header = header.replace('(aux_axis_origin 0 0)', f'(aux_axis_origin {ex1} {ey2})')
     s = [header, '\t(net 0 "")']
     for n, i in sorted(netcode.items(), key=lambda kv: kv[1]):
         s.append(f'\t(net {i} {dump(n)})')

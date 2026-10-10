@@ -269,7 +269,7 @@ Through-hole equivalents are in brackets where the part changed.
 
 For each part, **centre** is the footprint origin, which a pick-and-place machine uses for SMD parts. **Pin 1** is the position of pad 1. Both are measured from the board's top-left corner (Y downward, top view). Rotation is the footprint angle in degrees. Every part is on the top side.
 
-For a machine-ready position file (origin bottom-left, Y up), run `kicad-cli pcb export pos --side front --units mm kicad-smt/AC30_SMT.kicad_pcb`.
+The machine-ready position file is `kicad-smt/AC30_SMT-top-pos.csv`: the 109 SMD parts (the through-hole connectors and wire pads are hand-soldered and left out), in mm, measured from the board's **bottom-left** corner with Y up. That corner is the board's drill/place origin, (30, 118) in KiCad page coordinates. Its X values match the table below, and its Y is 88.5 minus the table's centre Y. Rotations are KiCad's; some assembly houses apply their own rotation offsets per package.
 
 | Ref | Value | Footprint | Centre X | Centre Y | Pin 1 X | Pin 1 Y | Rot |
 |---|---|---|---|---|---|---|---|
@@ -434,6 +434,8 @@ How the layout is built:
 | `AC30_SMT-job.gbrjob` | Gerber job file (layer stack, board size) |
 | `AC30_SMT-PTH.drl`, `AC30_SMT-NPTH.drl` | Excellon drill files in mm: 379 plated holes, 4 unplated (mounting holes) |
 | `*-drl_map.pdf`, `AC30_SMT-drill-report.txt` | Drill maps and the drill report |
+| `kicad-smt/AC30_SMT-top-pos.csv` | Pick-and-place position file (not in the zip): SMD parts only, mm, origin at the bottom-left corner |
+| `kicad-smt/AC30_SMT-BOM.csv` | BOM from the schematic |
 
 ### 3D model
 
