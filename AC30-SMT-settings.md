@@ -69,7 +69,7 @@ After routing, `tools/zones.py` adds one GND zone on F.Cu and B.Cu covering the 
 | Minimum fill width | 0.25 mm |
 | Pad connection | Thermal reliefs: 0.5 mm gap, 0.5 mm spokes |
 | Islands | Removed (fill not connected to GND is deleted) |
-| Solid-connected pads | J4.2 and J14.2 (2 pads) |
+| Solid-connected pads | J14.2 (1 pad, from this build's routing) |
 
 The solid-connected pads are GND pads where the routed tracks left a thermal relief with only a spoke into an isolated scrap of fill, which DRC reports as a starved thermal. `build.sh` gives just those pads a solid connection and refills until none is left. The other GND pads keep their thermal reliefs, which makes them easier to hand-solder and reduces tombstoning on small parts. `FILL=0 tools/build.sh` builds without the fill.
 
@@ -78,11 +78,11 @@ The solid-connected pads are GND pads where the routed tracks left a thermal rel
 | Class | Nets | Track | Clearance | Via (pad / drill) |
 |---|---|---|---|---|
 | Default | all signal nets | **0.25 mm** (9.8 mil) | 0.20 mm | 0.8 / 0.4 mm |
-| Power | +5V, GND, +13V, −13V, +7.5V, −7.5V | **0.60 mm** (23.6 mil) | 0.20 mm | 1.0 / 0.5 mm |
+| Power | +5V, GND, +13V, −13V, +7.5V, −7.5V; MOTOR_1A/1B/2A/2B (motor contacts), RELAY_1/2 (relay coil drive) | **0.60 mm** (23.6 mil) | 0.20 mm | 1.0 / 0.5 mm |
 
 A 0.25 mm track fits between adjacent SOIC pads. The pads are 0.6 mm wide at 1.27 mm pitch, leaving a 0.67 mm gap, and the track plus 0.2 mm clearance on each side needs 0.65 mm.
 
-The motor and relay lines (MOTOR_1A/1B/2A/2B, RELAY_1/2) are in the Default class, so they use 0.25 mm tracks. Move them to Power if the motors draw more than about 0.5 A.
+The motor and relay lines are in the Power class, so they use 0.6 mm tracks (roughly 1.5 A on 1 oz copper with about 10 °C rise). The Omron G6K-2F-Y relay contacts are rated 1 A.
 
 ---
 
@@ -92,12 +92,12 @@ A KiCad drill size is the **finished hole size**; the board house adds its own p
 
 | Drill (mm) | in | Number bit | Count | Plated | Used by | Pad (mm) |
 |---|---|---|---|---|---|---|
-| 0.40 | 0.0157 | #78 | 284 | yes | Signal vias | 0.8 round |
-| 0.50 | 0.0197 | #76 | 18 | yes | Power vias | 1.0 round |
+| 0.40 | 0.0157 | #78 | 252 | yes | Signal vias | 0.8 round |
+| 0.50 | 0.0197 | #76 | 28 | yes | Power vias | 1.0 round |
 | 1.00 | 0.0394 | #60 | 36 | yes | J1, J2, J13–J15 front-panel jumper pads | 1.7 square (pin 1) / round |
 | 1.70 | 0.0669 | #51 | 41 | yes | J3–J5, J12 (Molex KK-396) | 3.16 × 4.1 oval |
 | 3.20 | 0.1260 | #30, or ⅛ in | 4 | **no** | H1–H4 mounting holes | none (bare hole) |
-| **Total** | | | **383** | | 81 component and mounting holes + 302 vias | |
+| **Total** | | | **361** | | 81 component and mounting holes + 280 vias | |
 
 Most of the holes are vias. SMD pads are only on the top, so many connections drop to B.Cu through a via. The via count comes from the router and changes if the placement changes.
 
@@ -145,14 +145,14 @@ Most of the holes are vias. SMD pads are only on the top, so many connections dr
 | DRC violations | 0 (all severities, including silkscreen) |
 | Schematic parity issues | 0 |
 | ERC violations | 0 |
-| Track segments | 1,698 |
-| Vias | 302 (284 at 0.8/0.4 mm, 18 at 1.0/0.5 mm) |
+| Track segments | 1,704 |
+| Vias | 280 (252 at 0.8/0.4 mm, 28 at 1.0/0.5 mm) |
 
 | Track width | F.Cu (top) | B.Cu (bottom) |
 |---|---|---|
-| 0.25 mm | 861 segments, 3,324 mm | 462 segments, 2,955 mm |
-| 0.60 mm | 328 segments, 1,319 mm | 47 segments, 503 mm |
-| **Total** | **4,643 mm** | **3,458 mm** |
+| 0.25 mm | 865 segments, 3,292 mm | 427 segments, 2,634 mm |
+| 0.60 mm | 353 segments, 1,503 mm | 59 segments, 726 mm |
+| **Total** | **4,795 mm** | **3,360 mm** |
 
 ---
 
@@ -448,7 +448,7 @@ How the layout is built:
 |---|---|
 | Gerbers (X2, Protel extensions) | F.Cu (`.gtl`), B.Cu (`.gbl`), F/B.Mask (`.gts`/`.gbs`), F/B.Silkscreen (`.gto`/`.gbo`, solder mask subtracted), Edge.Cuts (`.gm1`), F.Paste (`.gtp`, solder paste stencil) |
 | `AC30_SMT-job.gbrjob` | Gerber job file (layer stack, board size) |
-| `AC30_SMT-PTH.drl`, `AC30_SMT-NPTH.drl` | Excellon drill files in mm: 379 plated holes, 4 unplated (mounting holes) |
+| `AC30_SMT-PTH.drl`, `AC30_SMT-NPTH.drl` | Excellon drill files in mm: 357 plated holes, 4 unplated (mounting holes) |
 | `*-drl_map.pdf`, `AC30_SMT-drill-report.txt` | Drill maps and the drill report |
 | `kicad-smt/AC30_SMT-top-pos.csv` | Pick-and-place position file (not in the zip): SMD parts only, mm, origin at the bottom-left corner |
 | `kicad-smt/AC30_SMT-BOM.csv` | BOM from the schematic |

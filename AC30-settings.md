@@ -55,7 +55,7 @@ After routing, `tools/zones.py` adds one GND zone on F.Cu and B.Cu covering the 
 | Minimum fill width | 0.25 mm |
 | Pad connection | Thermal reliefs: 0.5 mm gap, 0.5 mm spokes |
 | Islands | Removed (fill not connected to GND is deleted) |
-| Solid-connected pads | IC5.6, IC5.7, IC5.8, IC9.7, J4.2, Q4.1, Q5.1, Q8.1, R20.2, R23.2 and R24.2 (11 pads) |
+| Solid-connected pads | D11.2, IC8.7, IC8.11 and Q7.1 (4 pads, from this build's routing) |
 
 The solid-connected pads are GND pads where the routed tracks left a thermal relief with only a spoke into an isolated scrap of fill, which DRC reports as a starved thermal. `build.sh` gives just those pads a solid connection and refills until none is left. The other GND pads keep their thermal reliefs, which makes them easier to hand-solder and reduces tombstoning on small parts. `FILL=0 tools/build.sh` builds without the fill.
 
@@ -64,9 +64,9 @@ The solid-connected pads are GND pads where the routed tracks left a thermal rel
 | Class | Nets | Track | Clearance | Via (pad / drill) |
 |---|---|---|---|---|
 | Default | all signal nets | **0.25 mm** (9.8 mil) | 0.20 mm | 0.8 / 0.4 mm |
-| Power | +5V, GND, +13V, −13V, +7.5V, −7.5V | **0.60 mm** (23.6 mil) | 0.20 mm | 1.0 / 0.5 mm |
+| Power | +5V, GND, +13V, −13V, +7.5V, −7.5V; MOTOR_1A/1B/2A/2B (motor contacts), RELAY_1/2 (relay coil drive) | **0.60 mm** (23.6 mil) | 0.20 mm | 1.0 / 0.5 mm |
 
-The motor and relay lines (MOTOR_1A/1B/2A/2B, RELAY_1/2) are in the Default class, so they use 0.25 mm tracks. That's good for roughly 0.5 A on 1 oz copper with about 10 °C rise. Move them to Power if the motors draw more.
+The motor and relay lines are in the Power class, so they use 0.6 mm tracks: roughly 1.5 A on 1 oz copper with about 10 °C rise, against roughly 0.5 A for a 0.25 mm track.
 
 ---
 
@@ -76,8 +76,8 @@ A KiCad drill size is the **finished hole size**. A board house adds its own all
 
 | Drill (mm) | in | Number bit | Count | Plated | Used by | Pad (mm) |
 |---|---|---|---|---|---|---|
-| 0.40 | 0.0157 | #78 | 81 | yes | Signal vias | 0.8 round |
-| 0.50 | 0.0197 | #76 | 2 | yes | Power vias | 1.0 round |
+| 0.40 | 0.0157 | #78 | 82 | yes | Signal vias | 0.8 round |
+| 0.50 | 0.0197 | #76 | 7 | yes | Power vias | 1.0 round |
 | 0.70 | 0.0276 | #70 | 8 | yes | RLY1, RLY2 (reed relay) | 1.4 round |
 | 0.75 | 0.0295 | #69 | 33 | yes | Q1–Q11 (TO-92) | 1.05 × 1.5 oval |
 | 0.80 | 0.0315 | #68 (1/32") | 363 | yes | ICs (DIP-8/14/16), resistors, diodes, disc caps (incl. C23–C25), C4, C17; R16 trimmer | 1.6 round (R16: 1.44) |
@@ -85,9 +85,9 @@ A KiCad drill size is the **finished hole size**. A board house adds its own all
 | 1.00 | 0.0394 | #60 | 38 | yes | C16 (10 mm electrolytic); J1, J2, J13–J15 front-panel jumper pads (36) | 2.0 round (C16); 1.7 square (pin 1) / round |
 | 1.70 | 0.0669 | #51 | 41 | yes | J3–J5, J12 (Molex KK-396) | 3.16 × 4.1 oval |
 | 3.20 | 0.1260 | #30, or ⅛ in | 4 | **no** | H1–H4 mounting holes | none (bare hole) |
-| **Total** | | | **572** | | 489 component and mounting holes + 83 vias | |
+| **Total** | | | **578** | | 489 component and mounting holes + 89 vias | |
 
-The 83 via positions and the split between the two via sizes come from the router, so they change from build to build. The component holes don't.
+The 89 via positions and the split between the two via sizes come from the router, so they change from build to build. The component holes don't.
 
 **If you have fewer bits:** the 0.70 and 0.75 mm holes can be drilled at 0.8 mm. That would leave three sizes for the component holes: 0.8, 1.0 and 1.7 mm, plus 3.2 mm for the mounting holes. The TO-92 pads would then have only a 0.125 mm ring on their narrow side.
 
@@ -115,14 +115,14 @@ The 83 via positions and the split between the two via sizes come from the route
 | Unrouted connections | 0 |
 | DRC violations | 0 (all severities, including silkscreen) |
 | Schematic parity issues | 0 |
-| Track segments | 1,486 |
-| Vias | 83 (81 at 0.8/0.4 mm, 2 at 1.0/0.5 mm) |
+| Track segments | 1,468 |
+| Vias | 89 (82 at 0.8/0.4 mm, 7 at 1.0/0.5 mm) |
 
 | Track width | F.Cu (top) | B.Cu (bottom) |
 |---|---|---|
-| 0.25 mm | 408 segments, 3,667 mm | 751 segments, 4,632 mm |
-| 0.60 mm | 163 segments, 887 mm | 164 segments, 1,158 mm |
-| **Total** | **4,554 mm** | **5,790 mm** |
+| 0.25 mm | 435 segments, 3,638 mm | 691 segments, 4,375 mm |
+| 0.60 mm | 156 segments, 918 mm | 186 segments, 1,401 mm |
+| **Total** | **4,556 mm** | **5,776 mm** |
 
 ---
 
@@ -396,7 +396,7 @@ How the layout is built:
 |---|---|
 | Gerbers (X2, Protel extensions) | F.Cu (`.gtl`), B.Cu (`.gbl`), F/B.Mask (`.gts`/`.gbs`), F/B.Silkscreen (`.gto`/`.gbo`, solder mask subtracted), Edge.Cuts (`.gm1`) |
 | `AC30-job.gbrjob` | Gerber job file (layer stack, board size) |
-| `AC30-PTH.drl`, `AC30-NPTH.drl` | Excellon drill files in mm: 568 plated holes, 4 unplated (mounting holes) |
+| `AC30-PTH.drl`, `AC30-NPTH.drl` | Excellon drill files in mm: 574 plated holes, 4 unplated (mounting holes) |
 | `*-drl_map.pdf`, `AC30-drill-report.txt` | Drill maps and the drill report |
 
 The board's drill/place origin is its bottom-left corner, (30, 156) in KiCad page coordinates. The Gerbers and drill files use absolute coordinates.

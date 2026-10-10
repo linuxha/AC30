@@ -562,6 +562,30 @@
       },
       {
         "netclass": "Power",
+        "pattern": "/MOTOR_1A"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "/MOTOR_1B"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "/MOTOR_2A"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "/MOTOR_2B"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "/RELAY_1"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "/RELAY_2"
+      },
+      {
+        "netclass": "Power",
         "pattern": "GND"
       }
     ]

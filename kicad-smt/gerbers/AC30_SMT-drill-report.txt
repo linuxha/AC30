@@ -1,5 +1,5 @@
 Drill report for AC30_SMT.kicad_pcb
-Created on 2026-10-10T06:24:48
+Created on 2026-10-10T07:04:19
 
 Copper Layer Stackup:
     =============================================================
@@ -10,12 +10,12 @@ Copper Layer Stackup:
 Drill file 'AC30_SMT-PTH.drl' contains
     plated through holes:
     =============================================================
-    T1  0.400mm  0.0157"  (284 holes))
-    T2  0.500mm  0.0197"  (18 holes))
+    T1  0.400mm  0.0157"  (252 holes))
+    T2  0.500mm  0.0197"  (28 holes))
     T3  1.000mm  0.0394"  (36 holes))
     T4  1.700mm  0.0669"  (41 holes))
 
-    Total plated holes count 379
+    Total plated holes count 357
 
 
 Drill file 'AC30_SMT-NPTH.drl' contains

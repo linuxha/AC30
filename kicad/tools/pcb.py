@@ -19,6 +19,9 @@ BORDER = 3.0                       # mm between outermost courtyard and board ed
 ORIGIN = 30.0                      # board top-left on the drawing sheet
 HOLE_INSET = 6.35                  # mounting hole centres 1/4" in from each edge (artwork)
 POWER_NETS = {'+5V', 'GND', '+13V', '-13V', '+7.5V', '-7.5V'}
+# Power netclass (0.6 mm tracks): the rails plus the motor contacts and relay coil drive
+POWER_CLASS = POWER_NETS | {'/MOTOR_1A', '/MOTOR_1B', '/MOTOR_2A', '/MOTOR_2B',
+                            '/RELAY_1', '/RELAY_2'}
 SCH_FILE = {'/': 'AC30.kicad_sch'}
 # Front-panel jumper pad strips: net names on the silkscreen beside each pad
 LABEL_SIZE = 0.8                   # mm text height
@@ -447,7 +450,7 @@ def update_project(pro):
                                          via_diameter=1.0, via_drill=0.5)]
     d['net_settings']['meta'] = {"version": 4}
     d['net_settings']['netclass_patterns'] = [{"netclass": "Power", "pattern": n}
-                                              for n in sorted(POWER_NETS)]
+                                              for n in sorted(POWER_CLASS)]
     rules = d.setdefault('board', {}).setdefault('design_settings', {}).setdefault('rules', {})
     rules.update({"min_clearance": 0.2, "min_track_width": 0.25, "min_copper_edge_clearance": 0.5,
                   "min_via_diameter": 0.8, "min_through_hole_diameter": 0.4, "min_hole_clearance": 0.25,
