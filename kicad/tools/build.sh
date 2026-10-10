@@ -1,7 +1,8 @@
 #!/bin/bash
 # Regenerate the schematic and PCB and run ERC/DRC using the KiCad AppImage
 # (its kicad-cli and its bundled symbol/footprint libraries).
-# <project>-BOM.csv is exported from the schematic.
+# <project>-BOM.csv is exported from the schematic. After routing, both copper layers
+# get a GND fill (tools/zones.py).
 # The board is autorouted with FreeRouting (ROUTE=0 places only), then <project>.step
 # is exported and checked in FreeCAD (AppImage, headless freecadcmd), and the Gerbers,
 # drill files and <project>-gerbers.zip are written by tools/gerbers.sh.
@@ -9,7 +10,8 @@
 #        tools/build.sh smt        surface-mount board, kicad-smt/AC30_SMT.*
 #        KICAD_APPIMAGE=... FREECAD_APPIMAGE=... FREEROUTING=... tools/build.sh
 #        PCB_GAP=mm (space between parts, default 2.0), ROUTE=0, ROUTE_ATTEMPTS=n,
-#        AC30_SEEDS="31 32" (placement seeds to try in turn until the routing is clean)
+#        AC30_SEEDS="31 32" (placement seeds to try in turn until the routing is clean),
+#        FILL=0 (no GND copper fill)
 set -euo pipefail
 TOOLS=$(cd "$(dirname "$0")" && pwd)
 export AC30_VARIANT=${1:-${AC30_VARIANT:-tht}}
@@ -116,6 +118,19 @@ done
 if [ "${ROUTE:-1}" != 0 ]; then
   cp "$OUT/overall.kicad_pcb" "$P.kicad_pcb"
   [ "$overall" -eq 0 ] || echo "WARNING: no DRC-clean routing; kept the best ($overall items)"
+fi
+# GND copper fill on both layers (tools/zones.py), filled by kicad-cli. GND pads whose
+# thermal relief is starved (a spoke into an isolated scrap of fill) get a solid
+# connection; refilling can starve another pad, so repeat until none is left.
+if [ "${ROUTE:-1}" != 0 ] && [ "${FILL:-1}" != 0 ]; then
+  python3 -I "$TOOLS/zones.py" "$P.kicad_pcb"
+  for i in 1 2 3 4 5 6; do
+    cli pcb drc --refill-zones --save-board --format json -o "$OUT/fill.json" "$P.kicad_pcb" >/dev/null
+    n=$(python3 -I -c 'import json, sys
+print(sum(v["type"] == "starved_thermal" for v in json.load(open(sys.argv[1]))["violations"]))' "$OUT/fill.json")
+    [ "$n" -eq 0 ] && break
+    python3 -I "$TOOLS/zones.py" --solid "$P.kicad_pcb" "$OUT/fill.json"
+  done
 fi
 cli pcb drc --schematic-parity -o "$OUT/drc.rpt" "$P.kicad_pcb" | grep -E "Found" || true
 grep "^\[" "$OUT/erc.rpt" "$OUT/drc.rpt" | cut -d: -f2- | sort | uniq -c || true

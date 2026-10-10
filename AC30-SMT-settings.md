@@ -31,7 +31,7 @@ All values were read from the board and project files with KiCad's own tools. Di
 | Solder mask | Green, both sides; expansion 0 mm (fab default), minimum web 0 mm |
 | Solder paste | Top side only, apertures as defined by each footprint (board paste margin 0) |
 | Silkscreen | White, both sides |
-| Copper fill / ground plane | **None.** GND is routed as 0.6 mm tracks. |
+| Copper fill / ground plane | **GND fill on both layers** over the whole board (see *GND copper fill* below). GND is also routed as 0.6 mm tracks. |
 | Mounting holes | 4 × 3.2 mm unplated, 6.35 mm (¼ in) in from each edge, as on the original artwork |
 | Parts | 122 footprints: 109 SMD components, 4 KK-396 connectors, 5 jumper pad strips and 4 mounting holes |
 | Pads | 416 SMD pads (top) and 77 plated through-hole pads (41 connector, 36 jumper) |
@@ -56,6 +56,22 @@ These are the same rules as the through-hole board.
 | Minimum through-hole drill | 0.40 | 15.7 |
 | Minimum via annular ring | 0.10 | 3.9 |
 | Minimum silkscreen text height / stroke | 0.80 / 0.08 | 31.5 / 3.1 |
+
+### GND copper fill
+
+After routing, `tools/zones.py` adds one GND zone on F.Cu and B.Cu covering the whole board outline, and `kicad-cli pcb drc --refill-zones` fills it.
+
+| Setting | Value |
+|---|---|
+| Net / layers | GND, F.Cu and B.Cu |
+| Outline | The board edge; the 0.5 mm copper-to-edge rule keeps the fill back from it |
+| Clearance to other nets | 0.30 mm |
+| Minimum fill width | 0.25 mm |
+| Pad connection | Thermal reliefs: 0.5 mm gap, 0.5 mm spokes |
+| Islands | Removed (fill not connected to GND is deleted) |
+| Solid-connected pads | J4.2 and J14.2 (2 pads) |
+
+The solid-connected pads are GND pads where the routed tracks left a thermal relief with only a spoke into an isolated scrap of fill, which DRC reports as a starved thermal. `build.sh` gives just those pads a solid connection and refills until none is left. The other GND pads keep their thermal reliefs, which makes them easier to hand-solder and reduces tombstoning on small parts. `FILL=0 tools/build.sh` builds without the fill.
 
 ### Net classes
 
