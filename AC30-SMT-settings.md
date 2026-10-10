@@ -402,7 +402,7 @@ The machine-ready position file is `kicad-smt/AC30_SMT-top-pos.csv`: the 109 SMD
 | Tool | Version / setting |
 |---|---|
 | KiCad | 10.0.7 AppImage (`~/bin/kicad.AppImage`), with its bundled symbol, footprint and 3D libraries |
-| FreeRouting | **2.4.1** (`~/bin/freerouting-2.4.1/`, with its own Java 25 runtime), run headless with `-mp 100 -mt 1` (`tools/route.py`). 2.1.0 reported this board complete but wrote sessions with segments missing. This build routed completely on the first attempt. |
+| FreeRouting | **2.4.1** (`~/bin/freerouting-2.4.1/`, with its own Java 25 runtime), run headless with `-mp 100 -mt 1` (`tools/route.py`). 2.1.0 reported this board complete but wrote sessions with segments missing. `build.sh` retries, finishes and, if needed, re-places the board with the next seed exactly as for the through-hole board (`AC30_SEEDS`, default 30, 31, 32 here). This build used seed 30 and routed completely on the first attempt. |
 | FreeCAD | 26.3.0 AppImage, headless `freecadcmd` check of `AC30_SMT.step` |
 | File formats | Schematic 20260306, PCB 20260206 (KiCad 10) |
 | Build command | `cd kicad && tools/build.sh smt` (environment: `AC30_VARIANT=smt`, `AC30_PROJECT=AC30_SMT`) |

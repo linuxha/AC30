@@ -346,7 +346,7 @@ def place(parts, pinnet, gap):
     orders = [list(range(n)), sorted(range(n), key=lambda i: -dims[i][2]),
               sorted(range(n), key=lambda i: -dims[i][1]),
               sorted(range(n), key=lambda i: -dims[i][1] * dims[i][2])]
-    rng = random.Random(30)
+    rng = random.Random(int(os.environ.get('AC30_SEED', 30)))
     for _ in range(int(os.environ.get('AC30_ORDERS', 300))):
         o = list(range(n))
         rng.shuffle(o)

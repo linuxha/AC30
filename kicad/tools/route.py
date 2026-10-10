@@ -7,7 +7,7 @@ A round on a board that already has tracks (a finishing pass, or ROUTE_ROUNDS=n)
 marks the existing wiring as protected, so FreeRouting only adds what is missing.
 build.sh retries from the unrouted board and keeps a DRC-clean result. The board is
 saved in place."""
-import math, os, subprocess, sys, tempfile
+import math, os, re, subprocess, sys, tempfile
 import pcbnew
 
 ROUNDS = int(os.environ.get('ROUTE_ROUNDS', 1))   # >1 re-routes on top of earlier rounds
@@ -101,6 +101,46 @@ def unrouted(board):
     return board.GetConnectivity().GetUnconnectedCount(False)
 
 
+def protect(dsn):
+    """Mark the DSN's wires and vias protected, except those within ROUTE_FREE_RADIUS mm
+    of a point in ROUTE_FREE ("x,y;x,y" in mm, board coordinates: the ends of the
+    unrouted connections), which FreeRouting may then move to make room."""
+    pts = [tuple(float(v) * 1000 for v in p.split(','))
+           for p in os.environ.get('ROUTE_FREE', '').split(';') if p]
+    r = float(os.environ.get('ROUTE_FREE_RADIUS', 0)) * 1000
+    text = open(dsn).read()
+    start = text.index('(wiring')
+    out, pos, freed = [text[:start]], start, 0
+    for m in re.finditer(r'\((?:wire|via) ', text[start:]):
+        a = start + m.start()
+        if a < pos:
+            continue
+        depth, b = 0, a                       # the element runs to its matching ")"
+        while True:
+            depth += {'(': 1, ')': -1}.get(text[b], 0)
+            b += 1
+            if depth == 0:
+                break
+        el = text[a:b]
+        if el.startswith('(wire'):
+            nums = re.search(r'\(path \S+ [\d.]+([^()]*)\)', el).group(1).split()
+        else:
+            nums = re.match(r'\(via "[^"]*"\s+(-?[\d.]+)\s+(-?[\d.]+)', el).groups()
+        nums = [float(v) for v in nums]
+        near = any(math.hypot(x - px, -y - py) <= r                  # DSN y is -y
+                   for x, y in zip(nums[::2], nums[1::2]) for px, py in pts)
+        if near:
+            freed += 1
+        else:
+            el = el.replace('(type route)', '(type protect)')
+        out += [text[pos:a], el]
+        pos = b
+    out.append(text[pos:])
+    open(dsn, 'w').write(''.join(out))
+    if pts:
+        print(f'freed {freed} wires/vias within {r / 1000:g} mm of {len(pts)} unrouted ends')
+
+
 def main(path, jar, passes=100):
     board = pcbnew.LoadBoard(path)
     tmp = tempfile.mkdtemp()
@@ -109,13 +149,15 @@ def main(path, jar, passes=100):
         if not pcbnew.ExportSpecctraDSN(board, dsn):
             sys.exit('DSN export failed')
         before = len(board.GetTracks())
+        left_before = unrouted(board) if before else None
         mp = passes
         if before:
-            # Finishing round: protect the existing wiring so FreeRouting only adds the
-            # missing connections (re-optimising everything is slow and can drop wires).
-            text = open(dsn).read().replace('(type route)', '(type protect)')
-            open(dsn, 'w').write(text)
-            mp = min(passes, 20)
+            # Finishing round: by default protect the existing wiring so FreeRouting only
+            # adds the missing connections (re-optimising everything is slow and can drop
+            # wires). ROUTE_PROTECT=0 lets it rip up and move existing tracks instead.
+            if os.environ.get('ROUTE_PROTECT', '1') != '0':
+                protect(dsn)
+            mp = min(passes, int(os.environ.get("ROUTE_FINISH_PASSES", 20)))
         with open(os.path.join(tmp, f'r{rnd}.log'), 'w') as log:
             cmd = ['java', '-jar', jar] if jar.endswith('.jar') else [jar]   # 2.4+: native launcher
             subprocess.run(cmd + ['-de', dsn, '-do', ses, '-mp', str(mp),
@@ -125,14 +167,15 @@ def main(path, jar, passes=100):
         board.Save(saved)
         if not pcbnew.ImportSpecctraSES(board, ses):     # replaces all tracks and vias
             sys.exit('SES import failed')
-        if before and len(board.GetTracks()) < before:
-            # the session lost existing wiring: keep the board as it was
-            print(f'round {rnd}: session dropped wiring ({len(board.GetTracks())} < {before}); kept previous')
-            board = pcbnew.LoadBoard(saved)
-            break
         stubs = remove_stubs(board)
         left = unrouted(board)
         n = len(board.GetTracks())
+        if before and left >= left_before:
+            # no progress (or wiring lost): keep the board as it was. The track count is
+            # no guide here, since FreeRouting merges segments while it finishes.
+            print(f'round {rnd}: no progress ({left} unrouted, was {left_before}); kept previous')
+            board = pcbnew.LoadBoard(saved)
+            break
         print(f'round {rnd}: {n} tracks/vias, {stubs} stubs removed, {left} unrouted')
         if left == 0:
             break

@@ -60,8 +60,8 @@ A KiCad drill size is the **finished hole size**. A board house adds its own all
 
 | Drill (mm) | in | Number bit | Count | Plated | Used by | Pad (mm) |
 |---|---|---|---|---|---|---|
-| 0.40 | 0.0157 | #78 | 84 | yes | Signal vias | 0.8 round |
-| 0.50 | 0.0197 | #76 | 3 | yes | Power vias | 1.0 round |
+| 0.40 | 0.0157 | #78 | 81 | yes | Signal vias | 0.8 round |
+| 0.50 | 0.0197 | #76 | 2 | yes | Power vias | 1.0 round |
 | 0.70 | 0.0276 | #70 | 8 | yes | RLY1, RLY2 (reed relay) | 1.4 round |
 | 0.75 | 0.0295 | #69 | 33 | yes | Q1–Q11 (TO-92) | 1.05 × 1.5 oval |
 | 0.80 | 0.0315 | #68 (1/32") | 363 | yes | ICs (DIP-8/14/16), resistors, diodes, disc caps (incl. C23–C25), C4, C17; R16 trimmer | 1.6 round (R16: 1.44) |
@@ -69,9 +69,9 @@ A KiCad drill size is the **finished hole size**. A board house adds its own all
 | 1.00 | 0.0394 | #60 | 38 | yes | C16 (10 mm electrolytic); J1, J2, J13–J15 front-panel jumper pads (36) | 2.0 round (C16); 1.7 square (pin 1) / round |
 | 1.70 | 0.0669 | #51 | 41 | yes | J3–J5, J12 (Molex KK-396) | 3.16 × 4.1 oval |
 | 3.20 | 0.1260 | #30, or ⅛ in | 4 | **no** | H1–H4 mounting holes | none (bare hole) |
-| **Total** | | | **576** | | 489 component and mounting holes + 87 vias | |
+| **Total** | | | **572** | | 489 component and mounting holes + 83 vias | |
 
-The 87 via positions and the split between the two via sizes come from the router, so they change from build to build. The component holes don't.
+The 83 via positions and the split between the two via sizes come from the router, so they change from build to build. The component holes don't.
 
 **If you have fewer bits:** the 0.70 and 0.75 mm holes can be drilled at 0.8 mm. That would leave three sizes for the component holes: 0.8, 1.0 and 1.7 mm, plus 3.2 mm for the mounting holes. The TO-92 pads would then have only a 0.125 mm ring on their narrow side.
 
@@ -99,14 +99,14 @@ The 87 via positions and the split between the two via sizes come from the route
 | Unrouted connections | 0 |
 | DRC violations | 0 (all severities, including silkscreen) |
 | Schematic parity issues | 0 |
-| Track segments | 1,395 |
-| Vias | 87 (84 at 0.8/0.4 mm, 3 at 1.0/0.5 mm) |
+| Track segments | 1,486 |
+| Vias | 83 (81 at 0.8/0.4 mm, 2 at 1.0/0.5 mm) |
 
 | Track width | F.Cu (top) | B.Cu (bottom) |
 |---|---|---|
-| 0.25 mm | 483 segments, 4,286 mm | 602 segments, 4,478 mm |
-| 0.60 mm | 154 segments, 794 mm | 156 segments, 1,173 mm |
-| **Total** | **5,080 mm** | **5,651 mm** |
+| 0.25 mm | 408 segments, 3,667 mm | 751 segments, 4,632 mm |
+| 0.60 mm | 163 segments, 887 mm | 164 segments, 1,158 mm |
+| **Total** | **4,554 mm** | **5,790 mm** |
 
 ---
 
@@ -220,60 +220,60 @@ Each X/Y is the position of the part's **pin 1**, measured from the board's top-
 
 | Ref | Value | Footprint | X | Y | Rot |
 |---|---|---|---|---|---|
-| C1 | 1000pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 121.50 | 100.40 | 90 |
-| C2 | 2000pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 151.50 | 97.20 | 90 |
-| C3 | 0.022uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 126.50 | 100.40 | 90 |
-| C4 | 1uF 15V | CP_Radial_D6.3mm_P2.50mm | 162.15 | 94.55 | 0 |
-| C5 | 0.01uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 156.50 | 97.20 | 90 |
-| C6 | 1000pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 54.50 | 84.40 | 90 |
-| C7 | 0.047uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 45.50 | 96.15 | 90 |
-| C8 | 0.022uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 50.50 | 96.15 | 90 |
-| C9 | 0.047uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 71.50 | 88.70 | 90 |
-| C10 | 2700pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 55.50 | 96.15 | 90 |
-| C11 | 470pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 61.50 | 102.95 | 90 |
-| C12 | 1000pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 6.50 | 72.35 | 90 |
-| C13 | 1000pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 11.50 | 72.35 | 90 |
-| C14 | 1000pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 16.50 | 72.35 | 90 |
-| C15 | 1000pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 21.50 | 72.35 | 90 |
-| C16 | 100uF 16V | CP_Radial_D10.0mm_P5.00mm | 12.75 | 57.30 | 0 |
-| C17 | 10uF 10V tant | CP_Radial_D6.3mm_P2.50mm | 99.15 | 92.55 | 0 |
-| C18 | 0.01uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 115.25 | 80.95 | 90 |
-| C19 | 470pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 157.50 | 43.85 | 90 |
-| C20 | 470pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 162.50 | 43.85 | 90 |
-| C23 | 0.1uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 104.80 | 70.80 | 90 |
-| C24 | 0.1uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 109.80 | 70.80 | 90 |
-| C25 | 0.1uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 114.80 | 70.80 | 90 |
-| D1 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 142.25 | 99.85 | 90 |
-| D2 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 146.75 | 99.85 | 90 |
-| D3 | 1N4732 4.7V | D_DO-35_SOD27_P7.62mm_Horizontal | 45.25 | 87.05 | 90 |
-| D4 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 49.75 | 87.05 | 90 |
-| D5 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 23.75 | 60.75 | 90 |
-| D6 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 82.25 | 61.70 | 90 |
-| D7 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 86.75 | 61.70 | 90 |
-| D8 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 120.00 | 26.15 | 90 |
-| D9 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 103.25 | 49.00 | 90 |
-| D10 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 107.75 | 49.00 | 90 |
-| D11 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 112.25 | 49.00 | 90 |
-| D18 | LED | LED_D5.0mm | 131.95 | 97.55 | 0 |
+| C1 | 1000pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 77.50 | 58.10 | 90 |
+| C2 | 2000pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 107.50 | 94.35 | 90 |
+| C3 | 0.022uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 82.50 | 58.10 | 90 |
+| C4 | 1uF 15V | CP_Radial_D6.3mm_P2.50mm | 118.15 | 91.70 | 0 |
+| C5 | 0.01uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 112.50 | 94.35 | 90 |
+| C6 | 1000pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 138.50 | 84.40 | 90 |
+| C7 | 0.047uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 129.50 | 96.15 | 90 |
+| C8 | 0.022uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 134.50 | 96.15 | 90 |
+| C9 | 0.047uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 155.50 | 43.85 | 90 |
+| C10 | 2700pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 139.50 | 96.15 | 90 |
+| C11 | 470pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 145.50 | 58.10 | 90 |
+| C12 | 1000pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 28.50 | 72.35 | 90 |
+| C13 | 1000pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 33.50 | 72.35 | 90 |
+| C14 | 1000pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 38.50 | 72.35 | 90 |
+| C15 | 1000pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 43.50 | 72.35 | 90 |
+| C16 | 100uF 16V | CP_Radial_D10.0mm_P5.00mm | 34.75 | 57.30 | 0 |
+| C17 | 10uF 10V tant | CP_Radial_D6.3mm_P2.50mm | 6.15 | 35.15 | 0 |
+| C18 | 0.01uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 22.25 | 23.55 | 90 |
+| C19 | 470pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 145.50 | 88.50 | 90 |
+| C20 | 470pF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 150.50 | 88.50 | 90 |
+| C23 | 0.1uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 60.80 | 100.90 | 90 |
+| C24 | 0.1uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 65.80 | 100.90 | 90 |
+| C25 | 0.1uF | C_Disc_D5.0mm_W2.5mm_P5.00mm | 70.80 | 100.90 | 90 |
+| D1 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 98.25 | 97.00 | 90 |
+| D2 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 102.75 | 97.00 | 90 |
+| D3 | 1N4732 4.7V | D_DO-35_SOD27_P7.62mm_Horizontal | 129.25 | 87.05 | 90 |
+| D4 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 133.75 | 87.05 | 90 |
+| D5 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 45.75 | 60.75 | 90 |
+| D6 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 38.25 | 91.80 | 90 |
+| D7 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 42.75 | 91.80 | 90 |
+| D8 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 71.00 | 47.45 | 90 |
+| D9 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 54.25 | 70.30 | 90 |
+| D10 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 58.75 | 70.30 | 90 |
+| D11 | 1N4148 | D_DO-35_SOD27_P7.62mm_Horizontal | 63.25 | 70.30 | 90 |
+| D18 | LED | LED_D5.0mm | 87.95 | 55.25 | 0 |
 | H1 | MountingHole | MountingHole_3.2mm_M3 | 6.35 | 6.35 | 0 |
 | H2 | MountingHole | MountingHole_3.2mm_M3 | 166.65 | 6.35 | 0 |
 | H3 | MountingHole | MountingHole_3.2mm_M3 | 166.65 | 120.15 | 0 |
 | H4 | MountingHole | MountingHole_3.2mm_M3 | 6.35 | 120.15 | 0 |
-| IC1 | 4013 | DIP-14_W7.62mm | 32.05 | 40.35 | 0 |
-| IC2 | 4001 | DIP-14_W7.62mm | 61.05 | 63.90 | 0 |
-| IC3 | 4070 | DIP-14_W7.62mm | 45.05 | 19.05 | 0 |
-| IC4 | 4558 | DIP-8_W7.62mm | 142.05 | 64.15 | 0 |
-| IC5 | 4013 | DIP-14_W7.62mm | 121.05 | 61.35 | 0 |
-| IC6 | 4053 | DIP-16_W7.62mm | 103.05 | 19.00 | 0 |
-| IC7 | 4049 | DIP-16_W7.62mm | 61.05 | 19.00 | 0 |
-| IC8 | 4013 | DIP-14_W7.62mm | 6.05 | 19.05 | 0 |
-| IC9 | 4023 | DIP-14_W7.62mm | 126.05 | 19.05 | 0 |
-| IC10 | 555 | DIP-8_W7.62mm | 98.05 | 76.40 | 0 |
-| IC11 | 4001 | DIP-14_W7.62mm | 144.05 | 19.05 | 0 |
-| IC12 | 1489 | DIP-14_W7.62mm | 29.05 | 19.05 | 0 |
-| IC13 | 4070 | DIP-14_W7.62mm | 82.05 | 19.05 | 0 |
-| IC14 | 4053 | DIP-16_W7.62mm | 144.05 | 40.30 | 0 |
-| IC15 | 1488 | DIP-14_W7.62mm | 157.05 | 19.05 | 0 |
+| IC1 | 4013 | DIP-14_W7.62mm | 15.05 | 43.10 | 0 |
+| IC2 | 4001 | DIP-14_W7.62mm | 145.05 | 19.05 | 0 |
+| IC3 | 4070 | DIP-14_W7.62mm | 129.05 | 19.05 | 0 |
+| IC4 | 4558 | DIP-8_W7.62mm | 98.05 | 61.30 | 0 |
+| IC5 | 4013 | DIP-14_W7.62mm | 77.05 | 19.05 | 0 |
+| IC6 | 4053 | DIP-16_W7.62mm | 54.05 | 40.30 | 0 |
+| IC7 | 4049 | DIP-16_W7.62mm | 77.05 | 63.65 | 0 |
+| IC8 | 4013 | DIP-14_W7.62mm | 28.05 | 19.05 | 0 |
+| IC9 | 4023 | DIP-14_W7.62mm | 98.05 | 19.05 | 0 |
+| IC10 | 555 | DIP-8_W7.62mm | 5.05 | 19.00 | 0 |
+| IC11 | 4001 | DIP-14_W7.62mm | 51.05 | 19.05 | 0 |
+| IC12 | 1489 | DIP-14_W7.62mm | 64.05 | 19.05 | 0 |
+| IC13 | 4070 | DIP-14_W7.62mm | 7.05 | 64.40 | 0 |
+| IC14 | 4053 | DIP-16_W7.62mm | 116.05 | 19.00 | 0 |
+| IC15 | 1488 | DIP-14_W7.62mm | 145.05 | 63.70 | 0 |
 | J1 | SWITCHES | PinHeader_1x19_P2.54mm_Vertical | 13.60 | 121.70 | 90 |
 | J2 | LEDS | PinHeader_1x05_P2.54mm_Vertical | 66.85 | 121.70 | 90 |
 | J3 | Computer interface (COMP) | Molex_KK-396_A-41791-0010_1x10_P3.96mm_Vertical | 14.20 | 9.10 | 0 |
@@ -283,65 +283,65 @@ Each X/Y is the position of the part's **pin 1**, measured from the board's top-
 | J13 | MOTOR | PinHeader_1x04_P2.54mm_Vertical | 84.55 | 121.70 | 90 |
 | J14 | MIC | PinHeader_1x04_P2.54mm_Vertical | 99.70 | 121.70 | 90 |
 | J15 | EAR | PinHeader_1x04_P2.54mm_Vertical | 114.85 | 121.70 | 90 |
-| Q1 | 2N5210 | TO-92_Inline | 45.45 | 101.90 | 0 |
-| Q2 | 2N5210 | TO-92_Inline | 66.45 | 99.65 | 0 |
-| Q3 | 2N5087 | TO-92_Inline | 52.90 | 101.90 | 0 |
-| Q4 | 2N5210 | TO-92_Inline | 116.95 | 43.05 | 0 |
-| Q5 | 2N5210 | TO-92_Inline | 126.45 | 54.80 | 0 |
-| Q6 | 2N5210 | TO-92_Inline | 133.90 | 54.80 | 0 |
-| Q7 | 2N5210 | TO-92_Inline | 61.45 | 57.30 | 0 |
-| Q8 | 2N5210 | TO-92_Inline | 68.90 | 57.30 | 0 |
-| Q9 | 2N5087 | TO-92_Inline | 6.45 | 78.15 | 0 |
-| Q10 | 2N5087 | TO-92_Inline | 13.90 | 78.15 | 0 |
-| Q11 | 2N5087 | TO-92_Inline | 107.25 | 91.90 | 0 |
-| R1 | 33K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 126.50 | 91.30 | 90 |
-| R2 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 131.50 | 91.30 | 90 |
-| R3 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 136.50 | 91.30 | 90 |
-| R4 | 330 | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 154.25 | 73.85 | 90 |
-| R5 | 2.2K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 159.25 | 73.85 | 90 |
-| R6 | 4.7K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 164.25 | 73.85 | 90 |
-| R7 | 470 | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 142.50 | 88.10 | 90 |
-| R8 | 100K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 147.50 | 88.10 | 90 |
-| R9 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 152.50 | 88.10 | 90 |
-| R10 | 330K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 157.50 | 88.10 | 90 |
-| R11 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 162.50 | 88.10 | 90 |
-| R12 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 45.50 | 49.00 | 90 |
-| R13 | 22K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 50.50 | 49.00 | 90 |
-| R14 | 22K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 73.25 | 73.55 | 90 |
-| R15 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 55.50 | 49.00 | 90 |
-| R16 | 20K trim | Potentiometer_Bourns_3386P_Vertical | 49.05 | 73.90 | 0 |
-| R17 | 100K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 45.50 | 63.25 | 90 |
-| R18 | 100K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 61.50 | 93.85 | 90 |
-| R19 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 50.50 | 63.25 | 90 |
-| R20 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 55.50 | 63.25 | 90 |
-| R21 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 66.50 | 93.85 | 90 |
-| R22 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 115.25 | 28.70 | 90 |
-| R23 | 100K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 18.25 | 28.70 | 90 |
-| R24 | 100K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 23.25 | 28.70 | 90 |
-| R25 | 100K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 6.50 | 49.00 | 90 |
-| R26 | 100K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 11.50 | 49.00 | 90 |
-| R27 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 16.50 | 49.00 | 90 |
-| R28 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 138.25 | 28.70 | 90 |
-| R29 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 126.50 | 49.00 | 90 |
-| R30 | 470 | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 131.50 | 49.00 | 90 |
-| R31 | 470 | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 136.50 | 49.00 | 90 |
-| R32 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 21.50 | 49.00 | 90 |
-| R33 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 6.50 | 63.25 | 90 |
-| R34 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 73.25 | 28.70 | 90 |
-| R35 | 470 | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 61.50 | 51.55 | 90 |
-| R36 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 66.50 | 51.55 | 90 |
-| R37 | 470 | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 71.50 | 51.55 | 90 |
-| R38 | 47K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 110.25 | 86.10 | 90 |
-| R40 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 133.25 | 71.00 | 90 |
-| R41 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 76.50 | 51.55 | 90 |
-| R42 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 94.25 | 28.70 | 90 |
-| R43 | 470 | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 121.50 | 91.30 | 90 |
-| R44 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 82.50 | 49.00 | 90 |
-| R45 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 87.50 | 49.00 | 90 |
-| R46 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 92.50 | 49.00 | 90 |
-| R47 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 97.50 | 49.00 | 90 |
-| RLY1 | 6V reed relay | Relay_SPST_StandexMeder_SIL_Form1A | 92.55 | 55.85 | 0 |
-| RLY2 | 6V reed relay | Relay_SPST_StandexMeder_SIL_Form1A | 83.55 | 67.55 | 0 |
+| Q1 | 2N5210 | TO-92_Inline | 129.45 | 101.90 | 0 |
+| Q2 | 2N5210 | TO-92_Inline | 150.45 | 54.80 | 0 |
+| Q3 | 2N5087 | TO-92_Inline | 136.90 | 101.90 | 0 |
+| Q4 | 2N5210 | TO-92_Inline | 67.95 | 64.35 | 0 |
+| Q5 | 2N5210 | TO-92_Inline | 98.45 | 54.80 | 0 |
+| Q6 | 2N5210 | TO-92_Inline | 105.90 | 54.80 | 0 |
+| Q7 | 2N5210 | TO-92_Inline | 77.45 | 101.95 | 0 |
+| Q8 | 2N5210 | TO-92_Inline | 84.90 | 101.95 | 0 |
+| Q9 | 2N5087 | TO-92_Inline | 28.45 | 78.15 | 0 |
+| Q10 | 2N5087 | TO-92_Inline | 35.90 | 78.15 | 0 |
+| Q11 | 2N5087 | TO-92_Inline | 14.25 | 34.50 | 0 |
+| R1 | 33K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 82.50 | 49.00 | 90 |
+| R2 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 87.50 | 49.00 | 90 |
+| R3 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 92.50 | 49.00 | 90 |
+| R4 | 330 | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 110.25 | 71.00 | 90 |
+| R5 | 2.2K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 115.25 | 71.00 | 90 |
+| R6 | 4.7K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 120.25 | 71.00 | 90 |
+| R7 | 470 | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 98.50 | 85.25 | 90 |
+| R8 | 100K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 103.50 | 85.25 | 90 |
+| R9 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 108.50 | 85.25 | 90 |
+| R10 | 330K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 113.50 | 85.25 | 90 |
+| R11 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 118.50 | 85.25 | 90 |
+| R12 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 129.50 | 49.00 | 90 |
+| R13 | 22K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 134.50 | 49.00 | 90 |
+| R14 | 22K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 157.25 | 28.70 | 90 |
+| R15 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 139.50 | 49.00 | 90 |
+| R16 | 20K trim | Potentiometer_Bourns_3386P_Vertical | 133.05 | 73.90 | 0 |
+| R17 | 100K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 129.50 | 63.25 | 90 |
+| R18 | 100K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 145.50 | 49.00 | 90 |
+| R19 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 134.50 | 63.25 | 90 |
+| R20 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 139.50 | 63.25 | 90 |
+| R21 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 150.50 | 49.00 | 90 |
+| R22 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 66.25 | 50.00 | 90 |
+| R23 | 100K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 40.25 | 28.70 | 90 |
+| R24 | 100K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 45.25 | 28.70 | 90 |
+| R25 | 100K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 28.50 | 49.00 | 90 |
+| R26 | 100K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 33.50 | 49.00 | 90 |
+| R27 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 38.50 | 49.00 | 90 |
+| R28 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 110.25 | 28.70 | 90 |
+| R29 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 98.50 | 49.00 | 90 |
+| R30 | 470 | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 103.50 | 49.00 | 90 |
+| R31 | 470 | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 108.50 | 49.00 | 90 |
+| R32 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 43.50 | 49.00 | 90 |
+| R33 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 28.50 | 63.25 | 90 |
+| R34 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 89.25 | 73.35 | 90 |
+| R35 | 470 | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 77.50 | 96.20 | 90 |
+| R36 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 82.50 | 96.20 | 90 |
+| R37 | 470 | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 87.50 | 96.20 | 90 |
+| R38 | 47K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 17.25 | 28.70 | 90 |
+| R40 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 89.25 | 28.70 | 90 |
+| R41 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 92.50 | 96.20 | 90 |
+| R42 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 19.25 | 74.05 | 90 |
+| R43 | 470 | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 77.50 | 49.00 | 90 |
+| R44 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 7.50 | 94.35 | 90 |
+| R45 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 12.50 | 94.35 | 90 |
+| R46 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 17.50 | 94.35 | 90 |
+| R47 | 10K | R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal | 22.50 | 94.35 | 90 |
+| RLY1 | 6V reed relay | Relay_SPST_StandexMeder_SIL_Form1A | 48.55 | 85.95 | 0 |
+| RLY2 | 6V reed relay | Relay_SPST_StandexMeder_SIL_Form1A | 39.55 | 97.65 | 0 |
 ---
 
 ## 9. Tools and generator settings
@@ -349,7 +349,7 @@ Each X/Y is the position of the part's **pin 1**, measured from the board's top-
 | Tool | Version / setting |
 |---|---|
 | KiCad | 10.0.7 AppImage (`~/bin/kicad.AppImage`), with its bundled symbol, footprint and 3D libraries |
-| FreeRouting | 2.4.1 (`~/bin/freerouting-2.4.1/`, with its own Java 25 runtime), run headless with `-mp 100 -mt 1` (`tools/route.py`). `build.sh` routes the placed board afresh up to 4 times (`ROUTE_ATTEMPTS`) and keeps the first result with a completely clean DRC. If none is clean, up to 3 finishing passes route only what's left on the best result, and each pass must pass DRC. In this build each attempt left one connection; the first finishing pass completed it with a clean DRC. |
+| FreeRouting | 2.4.1 (`~/bin/freerouting-2.4.1/`, with its own Java 25 runtime), run headless with `-mp 100 -mt 1` (`tools/route.py`). `build.sh` routes the placed board afresh up to 4 times (`ROUTE_ATTEMPTS`) and keeps the first result with a completely clean DRC. If none is clean, up to 3 finishing passes route only what's left on the best result: the existing wiring is protected except within 5, 10, then 20 mm of the unrouted ends, where FreeRouting may move tracks, and each pass must reduce the unrouted count and pass DRC. If a placement still isn't clean, `build.sh` places the board again with the next seed (`AC30_SEEDS`, default 31, 32, 34 for this board). This build used seed 31 and routed completely on the first attempt. |
 | FreeCAD | 26.3.0 AppImage (`~/bin/FreeCAD_26.3rc1-Linux-x86_64.AppImage`), headless `freecadcmd` check of `AC30.step` |
 | File formats | Schematic 20260306, PCB 20260206 (KiCad 10) |
 
@@ -362,8 +362,8 @@ Placement settings in `tools/pcb.py`:
 | Board origin on the drawing sheet | (30, 30) mm, before the outline is snapped to 0.5 mm |
 | Outline snap | 0.5 mm |
 | Height vs. wire weight (`AC30_HEIGHT_W`) | 60 for this board, set in `build.sh` (1 mm of board height costs the same as 60 mm of wire). At the default of 25 the bottom row pulled the board out to 148.5 mm tall. |
-| Block orders tried (`AC30_ORDERS`) | 300 random orders plus 4 sorted ones, seed 30 |
-| Estimated signal wiring | 8,351 mm (half-perimeter estimate, before routing; every net except +5V and GND) |
+| Block orders tried (`AC30_ORDERS`) | 300 random orders plus 4 sorted ones, seed 31 (`AC30_SEED`, set per try by `build.sh`). Seed 30 left Q8's collector boxed in, and one connection (R35–Q8) could not be routed. |
+| Estimated signal wiring | 7,945 mm (half-perimeter estimate, before routing; every net except +5V and GND) |
 | Mounting-hole inset (`HOLE_INSET`) | 6.35 mm; the connector rows are moved in to clear the holes |
 
 How the layout is built:
@@ -380,7 +380,7 @@ How the layout is built:
 |---|---|
 | Gerbers (X2, Protel extensions) | F.Cu (`.gtl`), B.Cu (`.gbl`), F/B.Mask (`.gts`/`.gbs`), F/B.Silkscreen (`.gto`/`.gbo`, solder mask subtracted), Edge.Cuts (`.gm1`) |
 | `AC30-job.gbrjob` | Gerber job file (layer stack, board size) |
-| `AC30-PTH.drl`, `AC30-NPTH.drl` | Excellon drill files in mm: 572 plated holes, 4 unplated (mounting holes) |
+| `AC30-PTH.drl`, `AC30-NPTH.drl` | Excellon drill files in mm: 568 plated holes, 4 unplated (mounting holes) |
 | `*-drl_map.pdf`, `AC30-drill-report.txt` | Drill maps and the drill report |
 
 The board's drill/place origin is its bottom-left corner, (30, 156) in KiCad page coordinates. The Gerbers and drill files use absolute coordinates.

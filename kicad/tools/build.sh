@@ -8,7 +8,8 @@
 # Usage: tools/build.sh            through-hole board, kicad/AC30.*
 #        tools/build.sh smt        surface-mount board, kicad-smt/AC30_SMT.*
 #        KICAD_APPIMAGE=... FREECAD_APPIMAGE=... FREEROUTING=... tools/build.sh
-#        PCB_GAP=mm (space between parts, default 2.0), ROUTE=0, ROUTE_ATTEMPTS=n
+#        PCB_GAP=mm (space between parts, default 2.0), ROUTE=0, ROUTE_ATTEMPTS=n,
+#        AC30_SEEDS="31 32" (placement seeds to try in turn until the routing is clean)
 set -euo pipefail
 TOOLS=$(cd "$(dirname "$0")" && pwd)
 export AC30_VARIANT=${1:-${AC30_VARIANT:-tht}}
@@ -42,6 +43,11 @@ for t in sym-lib-table fp-lib-table; do
   cp "$ROOT/share/kicad/template/$t" "$OUT/cfg/10.0/$t"
 done
 cli() { KICAD_CONFIG_HOME="$OUT/cfg" "$K" kicad-cli "$@"; }
+# route.py on the board, its summary line(s) without KiCad's Python start-up noise
+route() {
+  KICAD_CONFIG_HOME="$OUT/cfg" "$K" python3.11 "$TOOLS/route.py" "$P.kicad_pcb" "$FR" 2>&1 |
+    grep -v -e '^swig/python' -e 'Debug: Adding duplicate image handler' || true
+}
 
 echo "kicad-cli $(cli version)  libraries: $ROOT/share/kicad"
 python3 -I "$TOOLS/gen.py" . >/dev/null
@@ -54,9 +60,16 @@ cli sch export bom -o "$P-BOM.csv" --ref-range-delimiter '' \
   --fields 'Reference,Value,Footprint,${QUANTITY},${EXCLUDE_FROM_BOARD}' \
   --labels 'Reference,Value,Footprint,Qty,Excluded from board' \
   --group-by 'Value,Footprint,${EXCLUDE_FROM_BOARD}' "$P.kicad_sch" >/dev/null
-python3 -I "$TOOLS/pcb.py" "$OUT/$P.net" "$P.kicad_pcb" "${PCB_GAP:-2.0}" | tee "$OUT/pcb.txt"
-cli pcb upgrade "$P.kicad_pcb" >/dev/null
-if [ "${ROUTE:-1}" != 0 ]; then
+# Placement seeds (pcb.py's block-order search), tried in order until the routing is
+# DRC-clean; if none is, the best result over all seeds is kept.
+if [ "$AC30_VARIANT" = smt ]; then seeds=${AC30_SEEDS:-"30 31 32"}; else seeds=${AC30_SEEDS:-"31 32 34"}; fi
+overall=-1
+for seed in $seeds; do
+  AC30_SEED=$seed python3 -I "$TOOLS/pcb.py" "$OUT/$P.net" "$P.kicad_pcb" "${PCB_GAP:-2.0}" > "$OUT/pcb_try.txt"
+  echo "placement seed $seed: $(tail -1 "$OUT/pcb_try.txt")"
+  cli pcb upgrade "$P.kicad_pcb" >/dev/null
+  if [ "${ROUTE:-1}" = 0 ]; then cp "$OUT/pcb_try.txt" "$OUT/pcb.txt"; break; fi
+  prev=
   # FreeRouting results vary from run to run: route the placed board afresh up to
   # ROUTE_ATTEMPTS times and keep the first result with a completely clean DRC
   # (or, failing that, the one with the fewest DRC items).
@@ -64,31 +77,45 @@ if [ "${ROUTE:-1}" != 0 ]; then
   best=-1
   for attempt in $(seq 1 "${ROUTE_ATTEMPTS:-4}"); do
     cp "$OUT/placed.kicad_pcb" "$P.kicad_pcb"
-    KICAD_CONFIG_HOME="$OUT/cfg" "$K" python3.11 "$TOOLS/route.py" "$P.kicad_pcb" "$FR" 2>&1 |
-      grep -v '^swig/python' | sed "s/^/attempt $attempt: /"
+    res=$(route); echo "$res" | sed "s/^/attempt $attempt: /"
     cli pcb drc --schematic-parity -o "$OUT/drc_try.rpt" "$P.kicad_pcb" >/dev/null
     n=$(grep -c '^\[' "$OUT/drc_try.rpt" || true)
     echo "attempt $attempt: $n DRC items"
     if [ "$best" -lt 0 ] || [ "$n" -lt "$best" ]; then best=$n; cp "$P.kicad_pcb" "$OUT/best.kicad_pcb"; fi
     [ "$n" -eq 0 ] && break
     # FreeRouting 2.4 is deterministic: a repeat result means retrying won't help
-    if [ "${prev:-}" = "$n" ] && cmp -s "$P.kicad_pcb" "$OUT/prev.kicad_pcb"; then break; fi
-    prev=$n; cp "$P.kicad_pcb" "$OUT/prev.kicad_pcb"
+    # (compared by the route summary: the board files differ in KiCad's random track IDs)
+    [ "${prev:-}" = "$n $res" ] && break
+    prev="$n $res"
   done
   # Still not clean: finishing passes route only what is left on the best result
-  # (re-routing on top can add clearance errors, so each pass must pass DRC).
+  # (re-routing on top can add clearance errors, so each pass must pass DRC). The
+  # existing wiring is protected except within 5, 10, then 20 mm of the unrouted ends,
+  # where FreeRouting may move tracks to make room.
   for pass in 1 2 3; do
     [ "$best" -eq 0 ] && break
     cp "$OUT/best.kicad_pcb" "$P.kicad_pcb"
-    KICAD_CONFIG_HOME="$OUT/cfg" "$K" python3.11 "$TOOLS/route.py" "$P.kicad_pcb" "$FR" 2>&1 |
-      grep -v '^swig/python' | sed "s/^/finish $pass: /"
+    cli pcb drc --format json -o "$OUT/unrouted.json" "$P.kicad_pcb" >/dev/null
+    free=$(python3 -I -c 'import json, sys
+print(";".join("%g,%g" % (i["pos"]["x"], i["pos"]["y"])
+               for u in json.load(open(sys.argv[1]))["unconnected_items"] for i in u["items"]))' \
+      "$OUT/unrouted.json")
+    ROUTE_FREE=$free ROUTE_FREE_RADIUS=$((5 << (pass - 1))) route | sed "s/^/finish $pass: /"
     cli pcb drc --schematic-parity -o "$OUT/drc_try.rpt" "$P.kicad_pcb" >/dev/null
     n=$(grep -c '^\[' "$OUT/drc_try.rpt" || true)
     echo "finish $pass: $n DRC items"
     if [ "$n" -lt "$best" ]; then best=$n; cp "$P.kicad_pcb" "$OUT/best.kicad_pcb"; fi
   done
   cp "$OUT/best.kicad_pcb" "$P.kicad_pcb"
-  [ "$best" -eq 0 ] || echo "WARNING: no DRC-clean routing; kept the best ($best items)"
+  if [ "$overall" -lt 0 ] || [ "$best" -lt "$overall" ]; then
+    overall=$best; cp "$P.kicad_pcb" "$OUT/overall.kicad_pcb"; cp "$OUT/pcb_try.txt" "$OUT/pcb.txt"
+  fi
+  [ "$best" -eq 0 ] && break
+  echo "seed $seed: $best DRC items left, trying the next placement"
+done
+if [ "${ROUTE:-1}" != 0 ]; then
+  cp "$OUT/overall.kicad_pcb" "$P.kicad_pcb"
+  [ "$overall" -eq 0 ] || echo "WARNING: no DRC-clean routing; kept the best ($overall items)"
 fi
 cli pcb drc --schematic-parity -o "$OUT/drc.rpt" "$P.kicad_pcb" | grep -E "Found" || true
 grep "^\[" "$OUT/erc.rpt" "$OUT/drc.rpt" | cut -d: -f2- | sort | uniq -c || true
