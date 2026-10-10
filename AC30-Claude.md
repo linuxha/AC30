@@ -1,6 +1,6 @@
 # AC-30 KiCad Schematic: Claude Code Session Log
 
-Session dates: 2026-10-08 to 2026-10-10 (sections 1–16 on the 8th, 17–42 on the 9th, 43–65 on the 10th). Model: Claude Opus 5.5 (Claude Code CLI).
+Session dates: 2026-10-08 to 2026-10-10 (sections 1–16 on the 8th, 17–42 on the 9th, 43–68 on the 10th). Model: Claude Opus 5.5 (Claude Code CLI).
 
 This is a record of the chat that produced the KiCad project in `kicad/`. User messages are reproduced exactly, typos included. Claude's answers are in full for sections 1–3 and condensed from section 4 on. Claude's intermediate tool work (shell commands, image crops, file edits) is summarized rather than shown verbatim.
 
@@ -986,7 +986,48 @@ Committed `fbcc017` and pushed (`87c5ddc..fbcc017`).
 
 ### Claude's answer
 
-Added sections 62–65, committed and pushed.
+Added sections 62–65, committed `4b6a0a1` and pushed (`fbcc017..4b6a0a1`).
+
+---
+
+## 66. User
+
+> update the README with this session, commit and push
+
+### Claude's answer (condensed)
+
+The README already mentioned the fill. Claude expanded that sentence: thermal reliefs on the GND pads, the fill added automatically after routing, details in the settings files. Committed `6272608` and pushed (`4b6a0a1..6272608`).
+
+---
+
+## 67. User
+
+> move the motor and relay nets to the Power class, update gerbers, commit and push
+
+### Work done (summary)
+
+1. **`pcb.py`.** A new `POWER_CLASS` holds the rails plus MOTOR_1A/1B/2A/2B (motor contacts) and RELAY_1/2 (relay coil drive). The Power netclass patterns come from it, giving 0.6 mm tracks and 1.0/0.5 mm vias. `POWER_NETS`, which placement uses, is unchanged, so neither board's layout moved.
+2. **Rebuild.** Both boards routed on the first attempt.
+   - Every motor/relay track is 0.6 mm and every via on those nets is 1.0 mm.
+   - Through-hole: 1,468 segments, 89 vias, 578 holes.
+   - SMT: 1,704 segments, 280 vias, 361 holes.
+   - The GND fill's solid-connected pads follow the new routing: through-hole D11.2, IC8.7, IC8.11, Q7.1; SMT J14.2.
+   - ERC/DRC at every severity and parity clean; Gerbers regenerated.
+3. **Docs.** Both settings documents were updated: Power class row, track-current note (0.6 mm ≈ 1.5 A; SMT relay contacts rated 1 A), drill tables, routing figures, Gerber hole counts, solid-pad lists.
+
+### Claude's answer (condensed)
+
+Committed `8bf9a8b` and pushed (`6272608..8bf9a8b`). `kicad/AC30.kicad_prl` (KiCad's local view settings) was left uncommitted.
+
+---
+
+## 68. User
+
+> update AC30-Claude.md with this session, commit and push
+
+### Claude's answer
+
+Added sections 66–68, committed and pushed.
 
 ---
 
@@ -1001,7 +1042,7 @@ Added sections 62–65, committed and pushed.
 | PCB, SMT (`kicad-smt/AC30_SMT.*`) | 173.0 × 88.5 mm, 2 layers, SMT except the KK-396 connectors, wire pads and mounting holes, fully routed, GND fill on both layers; ERC, DRC and parity clean |
 | Connectors | J3–J5 match the original artwork; J12 is the power input; the front panel wires to through-hole pads J1 SWITCHES, J2 LEDS, J13 MOTOR, J14 MIC, J15 EAR (both boards) |
 | Mounting holes | 4 × 3.2 mm, 6.35 mm in from each corner |
-| Git | `main` = `origin/main` (pushed after section 65); root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
+| Git | `main` = `origin/main` (pushed after section 68); root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
 | Build | `cd kicad && tools/build.sh` (through-hole) or `tools/build.sh smt` (SMT): regenerate, ERC, BOM export, place (seeds tried in turn until routing is clean: 31 through-hole, 30 SMT), route (retries plus targeted finishing passes), GND fill (`tools/zones.py`), DRC, STEP export, FreeCAD check, Gerbers and drill files (`tools/gerbers.sh`) |
 | Tools | KiCad 10.0.7 AppImage, FreeRouting 2.4.1 (bundled Java 25), FreeCAD 26.3.0 AppImage |
 | Reference | `AC30-settings.md` and `AC30-SMT-settings.md`: rules, drill table, holes, connectors and wire pads, placement; `docs/AC30-BOM.md` and the KiCad BOM CSVs |
