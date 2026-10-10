@@ -75,7 +75,7 @@
 |------------|-----------------------------------------|-------|---|
 | RLY1, RLY2 | 6 VDC reed relay                        |       |   |
 | S1-S3      | DPDT miniature toggle switch            |       |   |
-| S4, SS     | SPDT center off miniature toggle switch |       |   |
+| S4, S5     | SPDT center off miniature toggle switch |       |   |
 | S6, S7     | SPDT miniature toggle switch            | PS S6 |   |
 | T1         | 18 VAC @300 Ma. secondary 120/240 VAC   | PS    |   |
 |            | 50-60 Hz primary power transformer      |       |   |

@@ -36,7 +36,7 @@ IC10	555 timer	1
 IC12	1489 quad RS-232 receiver	1
 IC15	1488 quad RS-232 transmitter	1
 IC16	7805 5 VDC regulator	1
-D1, D2, D4, D5-D11	1N4148 silicon diode	9
+D1, D2, D4, D5-D11	1N4148 silicon diode	10
 D3	4.7 volt zener diode 1N4732 or IN523	1
 D12, D13	7.5 volt zener diode 1N4737 or 1N523	2
 D14-D17	1N4003 silicon rectifier	4
