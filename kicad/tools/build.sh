@@ -3,7 +3,8 @@
 # (its kicad-cli and its bundled symbol/footprint libraries).
 # <project>-BOM.csv is exported from the schematic.
 # The board is autorouted with FreeRouting (ROUTE=0 places only), then <project>.step
-# is exported and checked in FreeCAD (AppImage, headless freecadcmd).
+# is exported and checked in FreeCAD (AppImage, headless freecadcmd), and the Gerbers,
+# drill files and <project>-gerbers.zip are written by tools/gerbers.sh.
 # Usage: tools/build.sh            through-hole board, kicad/AC30.*
 #        tools/build.sh smt        surface-mount board, kicad-smt/AC30_SMT.*
 #        KICAD_APPIMAGE=... FREECAD_APPIMAGE=... FREEROUTING=... tools/build.sh
@@ -111,3 +112,6 @@ if [ "$PW" != "$W" ] || [ "$PH" != "$H" ]; then
   echo "FreeCAD check FAILED: STEP board ${PW} x ${PH} mm, outline ${W} x ${H} mm"; exit 1
 fi
 echo "FreeCAD check: OK"
+
+# Fabrication outputs: Gerbers, drill files and the zip for the board house
+KICAD_APPIMAGE="$K" "$TOOLS/gerbers.sh" "$AC30_VARIANT"

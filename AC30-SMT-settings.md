@@ -424,6 +424,17 @@ How the layout is built:
 - J3–J5 run along the top edge. The jumper pad rows (J1, J2, J13–J15, turned 90° so their labels face into the board) and J12 run along the bottom, sharing a bottom line and inset to clear the mounting holes.
 - A second search fixes the bottom connector row at its provisional height, so parts wired to it are pulled towards it.
 
+### Fabrication files
+
+`kicad-smt/gerbers/` and `kicad-smt/AC30_SMT-gerbers.zip` (the same files, zipped for the board house) are written by `kicad/tools/gerbers.sh` at the end of every build, or on their own with `tools/gerbers.sh smt`.
+
+| File | Contents |
+|---|---|
+| Gerbers (X2, Protel extensions) | F.Cu (`.gtl`), B.Cu (`.gbl`), F/B.Mask (`.gts`/`.gbs`), F/B.Silkscreen (`.gto`/`.gbo`, solder mask subtracted), Edge.Cuts (`.gm1`), F.Paste (`.gtp`, solder paste stencil) |
+| `AC30_SMT-job.gbrjob` | Gerber job file (layer stack, board size) |
+| `AC30_SMT-PTH.drl`, `AC30_SMT-NPTH.drl` | Excellon drill files in mm: 379 plated holes, 4 unplated (mounting holes) |
+| `*-drl_map.pdf`, `AC30_SMT-drill-report.txt` | Drill maps and the drill report |
+
 ### 3D model
 
 `kicad-smt/AC30_SMT.step` is exported on every build.
