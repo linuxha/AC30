@@ -10,6 +10,8 @@ setup a typical cassette plater/recorder setup to save and load code written on 
 
 **Note:**2026/10/10 - Both boards (through-hole `kicad/AC30` and SMT `kicad-smt/AC30_SMT`) now wire the front panel (switches, LEDs, motor jacks, MIC A/B and EAR A/B jacks) to labelled through-hole wire pads instead of the J1/J2 Molex connectors. Board details are in [AC30-settings.md](AC30-settings.md) and [AC30-SMT-settings.md](AC30-SMT-settings.md); the parts list is [docs/AC30-BOM.md](docs/AC30-BOM.md), with KiCad BOMs in `kicad/AC30-BOM.csv` and `kicad-smt/AC30_SMT-BOM.csv`.
 
+Board sizes are now 173.0 x 126.5 mm (6.8" x 5.0") through-hole and 173.0 x 88.5 mm (6.8" x 3.5") SMT. Gerbers and drill files for both boards are ready for the board house: [kicad/AC30-gerbers.zip](kicad/AC30-gerbers.zip) (through-hole) and [kicad-smt/AC30_SMT-gerbers.zip](kicad-smt/AC30_SMT-gerbers.zip) (SMT, including the top paste layer for a stencil). `kicad/tools/build.sh` regenerates them on every build, or run `kicad/tools/gerbers.sh` (add `smt` for the SMT board).
+
 2026/10/09 - I've update the PCB to add the mod/demod circuits and a molex for the power. Additionally I had a new SMT version created.
 
 2026/10/08 - This is my first go around with Claude, Kicad and FreeCAD and creating a PCB to be sent off as gerbers. I have a lot of inspecting to do. But for a 1st go this is scary impressive.
