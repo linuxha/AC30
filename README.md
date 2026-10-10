@@ -8,7 +8,9 @@ A reproduction SWTPC AC-30 Cassette Interface
 I have a couple of Motorola MC6800, MC6802, and MC6809 machines from the 1970's. And I wanted to
 setup a typical cassette plater/recorder setup to save and load code written on these machines.
 
-**Note:** 2026/10/08 - This is my first go around with Claude, Kicad and FreeCAD and creating a PCB to be sent off as gerbers. I have a lot of inspecting to do. But for a 1st go this is scary impressive.
+**Note:**2026/10/09 - I've update the PCB to add the mod/demod circuits and a molex for the power. Additionally I had a new SMT version created.
+
+2026/10/08 - This is my first go around with Claude, Kicad and FreeCAD and creating a PCB to be sent off as gerbers. I have a lot of inspecting to do. But for a 1st go this is scary impressive.
 
 ## Claude created Kicad files
 
