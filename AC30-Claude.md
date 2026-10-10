@@ -1,6 +1,6 @@
 # AC-30 KiCad Schematic: Claude Code Session Log
 
-Session dates: 2026-10-08 to 2026-10-10 (sections 1–16 on the 8th, 17–42 on the 9th, 43–55 on the 10th). Model: Claude Opus 5.5 (Claude Code CLI).
+Session dates: 2026-10-08 to 2026-10-10 (sections 1–16 on the 8th, 17–42 on the 9th, 43–61 on the 10th). Model: Claude Opus 5.5 (Claude Code CLI).
 
 This is a record of the chat that produced the KiCad project in `kicad/`. User messages are reproduced exactly, typos included. Claude's answers are in full for sections 1–3 and condensed from section 4 on. Claude's intermediate tool work (shell commands, image crops, file edits) is summarized rather than shown verbatim.
 
@@ -839,7 +839,103 @@ Added a paragraph to the README's 2026/10/10 note: board sizes (173.0 × 126.5 m
 
 ### Claude's answer
 
-Added sections 54–55, committed and pushed.
+Added sections 54–55, committed `94baf42` and pushed (`e5a5d8f..94baf42`).
+
+---
+
+## 56. User
+
+> generate the position files for the SMT board
+
+### Work done (summary)
+
+1. **Origin.** `pcb.py` sets the drill/place origin (`aux_axis_origin`) at the bottom-left corner of both boards, the usual pick-and-place origin.
+2. **Position file.** `tools/gerbers.sh smt` writes `kicad-smt/AC30_SMT-top-pos.csv`: the 109 SMD parts, mm, top side, from the bottom-left corner with Y up (THT connectors and wire pads left out). Spot checks agree with the placement table in `AC30-SMT-settings.md`.
+3. **Rebuild.** Both boards were rebuilt to carry the origin. The SMT board came out identical apart from the origin line.
+
+---
+
+## 57. User
+
+> ok, finish it and then commit and push
+
+### Work done (summary)
+
+The through-hole rebuild left one connection unrouted: all three finishing passes were rejected. Rather than commit that, the previous fully routed through-hole board was restored with only the origin line added (DRC and parity clean), and its Gerbers were regenerated. Both settings documents describe the position file and origin.
+
+### Claude's answer (condensed)
+
+Committed `97f89f4` and pushed (`94baf42..97f89f4`), noting that a fresh through-hole build would no longer route completely.
+
+---
+
+## 58. User
+
+> Describe all known problems
+
+### Claude's answer (condensed)
+
+A list of 27 known problems, most important first:
+- **Build:** a fresh through-hole build left one connection unrouted, and the early stop for repeated routing results never fired.
+- **Transcription assumptions** to check against the originals: IC16 ground, the IC15 and IC4 supplies, R16, IC10 pins 4/8, the 4053 INH/VEE pins, IC1B.
+- **Omissions:** R39 is on no schematic and isn't placed.
+- **SMT substitutions:** the relay coil and polarity, MMBT5088 for the 2N5210, the tantalum voltage margins, position-file rotation offsets.
+- **PCB:** no ground plane, 0.25 mm motor/relay tracks, audio crossing the board, tracks under the pad labels, the narrow TO-92 annular ring. The Gerbers had not been inspected in a viewer, and the boards don't fit the original enclosure's mounting.
+- **Tools:** noisy diffs from random pin IDs and timestamps, KiCad 10 files that the system KiCad 9 can't open, the stale AppImage mount, KiCad open during regenerations.
+- **Documentation:** out-of-date text in the README and parts list.
+
+---
+
+## 59. User
+
+> fix the through-hole build so it routes completely
+
+### Work done (summary)
+
+1. **Not the origin.** The DSN given to FreeRouting is byte-identical with or without the place origin.
+2. **The real cause.** The open connection was R35 pad 1 to Q8 collector (net Q8_C, about 11 mm). With the seed-30 placement, the Q7/Q8 base and collector tracks and a GND line box in Q8's collector pad on both layers. The earlier clean board only got there because one finishing pass happened to succeed.
+3. **Things that did not help:**
+   - more finishing passes (100);
+   - unprotected finishing, which left 7 unrouted;
+   - freeing the wiring within 5 or 10 mm of the gap;
+   - height weights 50, 55 and 70. Weight 50 routed but grew the board to 133.5 mm; 55 and 70 left the connection open.
+   - A 2.5 mm part gap routed, but at 176.5 × 159.5 mm.
+4. **Placement seed.** Seeds tried in parallel copies:
+
+   | Seed | Result |
+   |---|---|
+   | 31 | Routed on the first attempt at 173.0 × 126.5 mm, estimated wiring 7,945 mm |
+   | 32 | Routed on the first attempt |
+   | 33 | One connection left |
+   | 34 | Routed after one targeted finishing pass |
+5. **Changes:**
+   - `pcb.py` reads the seed from `AC30_SEED`.
+   - `build.sh` tries placement seeds in turn until the routing is clean (`AC30_SEEDS`: 31, 32, 34 through-hole; 30, 31, 32 SMT, so the SMT board is unchanged).
+   - Finishing passes protect the existing wiring except within 5, 10, then 20 mm of the unrouted ends, taken from a JSON DRC report (`ROUTE_FREE`, `ROUTE_FREE_RADIUS`).
+   - A finishing pass is kept when it reduces the unrouted count. The old track-count check rejected passes in which FreeRouting merged segments.
+   - The early stop compares route summaries, because the board files differ in KiCad's random track IDs.
+   - KiCad's debug noise is filtered from the log.
+6. **Result.** Through-hole 173.0 × 126.5 mm, routed on the first attempt with seed 31: 1,486 segments, 83 vias, ERC/DRC/parity clean. The SMT board is identical. `AC30-settings.md` was updated (drill table, routing, placement); `AC30-SMT-settings.md` notes the seed fallback.
+
+---
+
+## 60. User
+
+> ok, finish it and then commit and push
+
+### Claude's answer (condensed)
+
+Committed `e0abbaa` and pushed (`97f89f4..e0abbaa`). The through-hole board was open in KiCad, so the user was asked to reload it before saving.
+
+---
+
+## 61. User
+
+> update AC30-Claude.md with this session, commit and push
+
+### Claude's answer
+
+Added sections 56–61, committed and pushed.
 
 ---
 
@@ -854,11 +950,11 @@ Added sections 54–55, committed and pushed.
 | PCB, SMT (`kicad-smt/AC30_SMT.*`) | 173.0 × 88.5 mm, 2 layers, SMT except the KK-396 connectors, wire pads and mounting holes, fully routed; ERC, DRC and parity clean |
 | Connectors | J3–J5 match the original artwork; J12 is the power input; the front panel wires to through-hole pads J1 SWITCHES, J2 LEDS, J13 MOTOR, J14 MIC, J15 EAR (both boards) |
 | Mounting holes | 4 × 3.2 mm, 6.35 mm in from each corner |
-| Git | `main` = `origin/main` (pushed after section 55); root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
-| Build | `cd kicad && tools/build.sh` (through-hole) or `tools/build.sh smt` (SMT): regenerate, ERC, BOM export, place, route (retry plus finishing passes), DRC, STEP export, FreeCAD check, Gerbers and drill files (`tools/gerbers.sh`) |
+| Git | `main` = `origin/main` (pushed after section 61); root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
+| Build | `cd kicad && tools/build.sh` (through-hole) or `tools/build.sh smt` (SMT): regenerate, ERC, BOM export, place (seeds tried in turn until routing is clean: 31 through-hole, 30 SMT), route (retries plus targeted finishing passes), DRC, STEP export, FreeCAD check, Gerbers and drill files (`tools/gerbers.sh`) |
 | Tools | KiCad 10.0.7 AppImage, FreeRouting 2.4.1 (bundled Java 25), FreeCAD 26.3.0 AppImage |
 | Reference | `AC30-settings.md` and `AC30-SMT-settings.md`: rules, drill table, holes, connectors and wire pads, placement; `docs/AC30-BOM.md` and the KiCad BOM CSVs |
-| Fabrication | `kicad/gerbers/` + `kicad/AC30-gerbers.zip`; `kicad-smt/gerbers/` + `kicad-smt/AC30_SMT-gerbers.zip` |
+| Fabrication | `kicad/gerbers/` + `kicad/AC30-gerbers.zip`; `kicad-smt/gerbers/` + `kicad-smt/AC30_SMT-gerbers.zip`; SMT pick-and-place `kicad-smt/AC30_SMT-top-pos.csv` (origin bottom-left) |
 | Not placed | R39 (200K DELAY trimmer), which is on no schematic |
 
 ---
