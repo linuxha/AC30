@@ -20,7 +20,7 @@ All values were read from the board and project files with KiCad's own tools. Di
 | Item | Value |
 |---|---|
 | Size (outline) | **173.0 × 88.5 mm** (6.811 × 3.484 in) |
-| Compared with the through-hole board | 173.5 × 122.0 mm, so the SMT board has about 28% less area |
+| Compared with the through-hole board | 173.0 × 126.5 mm, so the SMT board has about 30% less area |
 | Outline | Rectangle on Edge.Cuts, 0.1 mm line, square corners |
 | Outline corners (KiCad page coords) | (30.0, 29.5) to (203.0, 118.0) |
 | Border | 3.0 mm from the outermost part courtyard to the board edge |
@@ -194,7 +194,7 @@ J3–J5 and J12 are Molex KK-396 vertical headers (A-41791 series), through-hole
 
 The SMT board has no front-panel harness connectors. The original J1/J2 KK-396 headers are replaced by five rows of plain through-hole pads along the bottom edge, one row per group of front-panel parts. Solder hook-up wire straight from each pad to the switch, LED or jack.
 - Pads are 1.7 mm with 1.0 mm holes at 2.54 mm (0.1 in) pitch (the `PinHeader_1x…_P2.54mm_Vertical` footprints). Pin 1 is square.
-- Each pad has its net name on the silkscreen beside it, and the group name is printed above the row. The through-hole board keeps J1/J2.
+- Each pad has its net name on the silkscreen beside it, and the group name is printed above the row.
 - Every wire has its own pad. The RECORD A/B (S2) and PLAY A/B (S3) audio poles wire to the SWITCHES row (AUDIO_OUT, MIC_A, MIC_B and AUDIO_IN, EAR_A, EAR_B). The four jacks wire to the MIC and EAR rows, each jack to a tip pad and its own GND pad. The board joins the MIC_x and EAR_x pads of the two rows.
 
 | Ref | Group | Pads | Pin 1 X | Pin 1 Y | Pads, from pin 1 (left) |

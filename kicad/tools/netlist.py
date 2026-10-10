@@ -101,33 +101,26 @@ def conn(ref, value, nets, group=GRP, sheet='main'):
         {1: {str(i + 1): net for i, net in enumerate(nets)}}, group,
         f'Connector_Molex:Molex_KK-396_A-41791-{n:04d}_1x{n:02d}_P3.96mm_Vertical', sheet)
 
-if SMT:
-    # Front panel wired to plain through-hole jumper pads (0.1" strips, net names on the
-    # silkscreen) instead of the J1/J2 harness connectors, one strip per panel item.
-    # Each wire gets its own pad: the RECORD A/B (S2) and PLAY A/B (S3) audio poles
-    # (common AUDIO_OUT / AUDIO_IN, throws MIC_x / EAR_x) wire to the SWITCHES strip,
-    # and the four jacks wire to the MIC and EAR strips; the board joins them.
-    def jumpers(ref, value, nets):
-        n = len(nets)
-        add(ref, f'Connector_Generic:Conn_01x{n:02d}', value,
-            {1: {str(i + 1): net for i, net in enumerate(nets)}}, 'Front panel jumper pads',
-            f'Connector_PinHeader_2.54mm:PinHeader_1x{n:02d}_P2.54mm_Vertical')
+# Front panel wired to plain through-hole jumper pads (0.1" strips, net names on the
+# silkscreen) instead of the original J1/J2 KK-396 harness connectors, one strip per
+# panel item (both boards).
+# Each wire gets its own pad: the RECORD A/B (S2) and PLAY A/B (S3) audio poles
+# (common AUDIO_OUT / AUDIO_IN, throws MIC_x / EAR_x) wire to the SWITCHES strip,
+# and the four jacks wire to the MIC and EAR strips; the board joins them.
+def jumpers(ref, value, nets):
+    n = len(nets)
+    add(ref, f'Connector_Generic:Conn_01x{n:02d}', value,
+        {1: {str(i + 1): net for i, net in enumerate(nets)}}, 'Front panel jumper pads',
+        f'Connector_PinHeader_2.54mm:PinHeader_1x{n:02d}_P2.54mm_Vertical')
 
-    jumpers('J1', 'SWITCHES', [P5, G, 'CARRIER_EN_N', 'MAN_MOTOR', 'REC_SET', 'REC_RST',
-                               'READ_SET', 'READ_RST', 'LOCAL_REMOTE',
-                               'AUDIO_OUT', 'MIC_A', 'MIC_B', 'REC_RLY_DRV', 'RELAY_1', 'RELAY_2',
-                               'READ_RLY_DRV', 'AUDIO_IN', 'EAR_A', 'EAR_B'])
-    jumpers('J2', 'LEDS', [P5, 'LED_REC_RDY', 'LED_READ_RDY', 'LED_REC_DATA', 'LED_READ_DATA'])
-    jumpers('J13', 'MOTOR', ['MOTOR_1A', 'MOTOR_1B', 'MOTOR_2A', 'MOTOR_2B'])
-    jumpers('J14', 'MIC', ['MIC_A', G, 'MIC_B', G])
-    jumpers('J15', 'EAR', ['EAR_A', G, 'EAR_B', G])
-else:
-    conn('J1', 'Front panel harness 1', ['MOTOR_1A', P5, 'LED_READ_DATA', G, 'RELAY_1', 'LED_REC_DATA',
-                                         'MOTOR_1B', 'LOCAL_REMOTE', 'READ_RST', 'REC_RLY_DRV', 'MAN_MOTOR',
-                                         'READ_RLY_DRV', 'RELAY_2', 'MOTOR_2A', None])
-    conn('J2', 'Front panel harness 2', ['MOTOR_2B', 'READ_SET', 'REC_SET', 'REC_RST', 'LED_READ_RDY',
-                                         'LED_REC_RDY', 'AUDIO_OUT', 'AUDIO_IN', 'CARRIER_EN_N', G,
-                                         None, None])     # 11/12 18 VAC A/B: supply is now external
+jumpers('J1', 'SWITCHES', [P5, G, 'CARRIER_EN_N', 'MAN_MOTOR', 'REC_SET', 'REC_RST',
+                           'READ_SET', 'READ_RST', 'LOCAL_REMOTE',
+                           'AUDIO_OUT', 'MIC_A', 'MIC_B', 'REC_RLY_DRV', 'RELAY_1', 'RELAY_2',
+                           'READ_RLY_DRV', 'AUDIO_IN', 'EAR_A', 'EAR_B'])
+jumpers('J2', 'LEDS', [P5, 'LED_REC_RDY', 'LED_READ_RDY', 'LED_REC_DATA', 'LED_READ_DATA'])
+jumpers('J13', 'MOTOR', ['MOTOR_1A', 'MOTOR_1B', 'MOTOR_2A', 'MOTOR_2B'])
+jumpers('J14', 'MIC', ['MIC_A', G, 'MIC_B', G])
+jumpers('J15', 'EAR', ['EAR_A', G, 'EAR_B', G])
 conn('J3', 'Computer interface (COMP)', [G, 'CPU_CLK_OUT', 'CPU_CLK_IN', None, 'CPU_RS232_IN',
                                          'CPU_RS232_OUT', None, None, None, None])
 conn('J4', 'Control interface', [None, G, None, 'LOCAL_REMOTE', 'STOP_RECORD', P5, 'STOP_READ',

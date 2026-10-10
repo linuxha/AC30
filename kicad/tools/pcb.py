@@ -20,7 +20,7 @@ ORIGIN = 30.0                      # board top-left on the drawing sheet
 HOLE_INSET = 6.35                  # mounting hole centres 1/4" in from each edge (artwork)
 POWER_NETS = {'+5V', 'GND', '+13V', '-13V', '+7.5V', '-7.5V'}
 SCH_FILE = {'/': 'AC30.kicad_sch'}
-# Front-panel jumper pad strips (SMT board): net names on the silkscreen beside each pad
+# Front-panel jumper pad strips: net names on the silkscreen beside each pad
 LABEL_SIZE = 0.8                   # mm text height
 LABEL_CW = 0.75                    # mm per character allowed for the label length
 LABEL_X = 2.2                      # label start, from the strip centre line
@@ -352,7 +352,7 @@ def place(parts, pinnet, gap):
         rng.shuffle(o)
         orders.append(o)
     best = min(orders, key=lambda o: skyline(o, False)[0])
-    # Second pass: put the bottom connector row (J1, J2, J12) where that layout ends,
+    # Second pass: put the bottom row (jumper pads J1, J2, J13-J15 and J12) where that layout ends,
     # so parts wired to it are pulled down towards it too, then search again.
     _, bottom = skyline(best, False)
     pack_bottom(bot, x0 + hx, bottom, width - 2 * hx + 1, 2 * gap)

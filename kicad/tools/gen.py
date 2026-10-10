@@ -303,17 +303,18 @@ Transcription notes / assumptions:
  - IC10 pins 4/8 tie to the R38 supply node, assumed +5V.
  - IC15 (1488) supply pins are not shown; taken as +13V / -13V from the power supply (sheet 3).
  - CONTROL INVERT: drawn as R42 pull-up; it is also brought out on J4.
- - J1-J5 pin positions match the original artwork (docs/ac30_redblue150.jpg); J1 pin 15 is\n   unlabelled there and left unused.
+ - J3-J5 pin positions match the original artwork (docs/ac30_redblue150.jpg).
+ - The front panel is wired to five rows of 0.1 in through-hole pads instead of the artwork's
+   J1/J2 harness headers: J1 SWITCHES, J2 LEDS, J13 MOTOR, J14 MIC (MIC A/B jacks) and
+   J15 EAR (EAR A/B jacks). The S2/S3 audio poles wire to the SWITCHES pads (AUDIO_OUT,
+   MIC_A/B, AUDIO_IN, EAR_A/B); the board joins them.
  - MIC/EAR jack reference designators J6-J9 are assigned arbitrarily; J10/J11 are the motor jacks.
  - Trimmer R39 (DELAY, next to IC10 on the artwork) is not on any schematic; it is listed,\n   not placed, in tools/netlist.py.
- - J2 pins 11/12 (18 VAC A/B on the artwork) are unused: the power supply is external."""
+ - The artwork's J2 pins 11/12 (18 VAC A/B) are gone: the power supply is external."""
 
 NOTES_SMT = """
 SMT variant (kicad-smt/AC30_SMT): every on-board part is surface mount except the Molex KK-396
-connectors (J3-J5, J12), the front-panel jumper pads and the mounting holes. The front panel is
-wired to five rows of 0.1 in through-hole pads instead of the J1/J2 harness headers: J1 SWITCHES,
-J2 LEDS, J13 MOTOR, J14 MIC (MIC A/B jacks) and J15 EAR (EAR A/B jacks). The S2/S3 audio
-poles wire to the SWITCHES pads (AUDIO_OUT, MIC_A/B, AUDIO_IN, EAR_A/B); the board joins them. 0805 R/C, SOD-123 diodes (1N4148W, BZT52C4V7), SOT-23
+connectors (J3-J5, J12), the front-panel jumper pads and the mounting holes. 0805 R/C, SOD-123 diodes (1N4148W, BZT52C4V7), SOT-23
 transistors (MMBT5088 for 2N5210, MMBT5087), SOIC ICs, tantalum EIA-3216 (C4, C17),
 6.3x7.7 mm aluminium C16, Bourns 3314G trimmer R16, 1206 LED D18. RLY1/RLY2 are Omron
 G6K-2F-Y (5 V coil, DPDT 1 A, both poles in parallel as the motor contact) instead of

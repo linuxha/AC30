@@ -14,6 +14,8 @@ if [ "$AC30_VARIANT" = smt ]; then
   export AC30_PROJECT=AC30_SMT; DIR=$TOOLS/../../kicad-smt
 else
   export AC30_PROJECT=AC30; DIR=$TOOLS/..
+  # the larger through-hole parts need board height weighted more heavily against wire
+  export AC30_HEIGHT_W=${AC30_HEIGHT_W:-60}
 fi
 P=$AC30_PROJECT
 mkdir -p "$DIR"; cd "$DIR"
