@@ -1,6 +1,6 @@
 # AC-30 KiCad Schematic: Claude Code Session Log
 
-Session dates: 2026-10-08 to 2026-10-10 (sections 1–16 on the 8th, 17–42 on the 9th, 43–47 on the 10th). Model: Claude Opus 5.5 (Claude Code CLI).
+Session dates: 2026-10-08 to 2026-10-10 (sections 1–16 on the 8th, 17–42 on the 9th, 43–51 on the 10th). Model: Claude Opus 5.5 (Claude Code CLI).
 
 This is a record of the chat that produced the KiCad project in `kicad/`. User messages are reproduced exactly, typos included. Claude's answers are in full for sections 1–3 and condensed from section 4 on. Claude's intermediate tool work (shell commands, image crops, file edits) is summarized rather than shown verbatim.
 
@@ -747,6 +747,50 @@ Committed `6d04833`. The SMT project was open in KiCad (lock files), so the user
 2. **Parts list.** `docs/AC30-BOM.md` keeps the original list and gains sections for the reproduction boards (KK-396 connectors, the wire pad rows, front-panel jacks, on-board C23–C25, mounting hardware), the SMT substitutions and the KiCad BOM files. `docs/AC30-BOM.csv` gained matching rows.
 3. **README and this log** updated.
 
+### Claude's answer (condensed)
+
+Reported the changes, two typos in the original parts list ("S4, SS"; a 1N4148 count of 9 for ten diodes), and that the user's three old SMT BOM exports were stale.
+
+---
+
+## 48. User
+
+> yes delete thos 3, finish it and then commit and push
+
+### Claude's answer (condensed)
+
+Deleted `kicad-smt/AC30_SMT.csv`, `AC30_SMT-B.csv` and `AC30_SMT-B2.csv` (untracked). Committed `971d1da` and pushed `main` (`ad90087..971d1da`), which also carried `a90aefc` and `6d04833`.
+
+---
+
+## 49. User
+
+> fix the S4, S5 and diode count typos
+
+### Claude's answer (condensed)
+
+`docs/AC30-BOM.md`: "S4, SS" → "S4, S5". `docs/AC30-BOM.csv`: D1, D2, D4, D5–D11 quantity 9 → 10.
+
+---
+
+## 50. User
+
+> commit and push
+
+### Claude's answer (condensed)
+
+Committed `933618e` and pushed `main` (`971d1da..933618e`).
+
+---
+
+## 51. User
+
+> update AC30-Claude.md with this session, commit and push
+
+### Claude's answer
+
+Added sections 48–51, committed and pushed.
+
 ---
 
 ## State at the end of the session
@@ -760,7 +804,7 @@ Committed `6d04833`. The SMT project was open in KiCad (lock files), so the user
 | PCB, SMT (`kicad-smt/AC30_SMT.*`) | 173.0 × 88.5 mm, 2 layers, SMT except the KK-396 connectors, wire pads and mounting holes, fully routed; ERC, DRC and parity clean |
 | Connectors | J3–J5 match the original artwork; J12 is the power input; the front panel wires to through-hole pads J1 SWITCHES, J2 LEDS, J13 MOTOR, J14 MIC, J15 EAR (both boards) |
 | Mounting holes | 4 × 3.2 mm, 6.35 mm in from each corner |
-| Git | `main` = `origin/main`; root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
+| Git | `main` = `origin/main` (pushed after section 51); root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
 | Build | `cd kicad && tools/build.sh` (through-hole) or `tools/build.sh smt` (SMT): regenerate, ERC, BOM export, place, route (retry plus finishing passes), DRC, STEP export, FreeCAD check |
 | Tools | KiCad 10.0.7 AppImage, FreeRouting 2.4.1 (bundled Java 25), FreeCAD 26.3.0 AppImage |
 | Reference | `AC30-settings.md` and `AC30-SMT-settings.md`: rules, drill table, holes, connectors and wire pads, placement; `docs/AC30-BOM.md` and the KiCad BOM CSVs |
