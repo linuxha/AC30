@@ -20,6 +20,10 @@ ORIGIN = 30.0                      # board top-left on the drawing sheet
 HOLE_INSET = 6.35                  # mounting hole centres 1/4" in from each edge (artwork)
 POWER_NETS = {'+5V', 'GND', '+13V', '-13V', '+7.5V', '-7.5V'}
 SCH_FILE = {'/': 'AC30.kicad_sch'}
+# Front-panel jumper pad strips (SMT board): net names on the silkscreen beside each pad
+LABEL_SIZE = 0.8                   # mm text height
+LABEL_CW = 0.75                    # mm per character allowed for the label length
+LABEL_X = 2.2                      # label start, from the strip centre line
 
 
 def uid(*p):
@@ -63,6 +67,27 @@ class Part:
         self.x = self.y = 0.0
         self.nets = {p[1]: pinnet.get((self.ref, p[1])) for p in find(self.tree, 'pad')}
         self.local_bbox = self._courtyard()
+        if self.is_jumper():
+            self._jumper_labels()
+
+    def is_jumper(self):
+        return self.c['fp'].startswith('Connector_PinHeader_2.54mm:')
+
+    def _jumper_labels(self):
+        """Room for the per-pad net labels (drawn by write()) and the strip title beside
+        the pads on the local +x side, which faces into the board once rotated 90."""
+        lmax = max((len(n) for n in self.nets.values() if n), default=0) * LABEL_CW
+        x1, y1, x2, y2 = self.local_bbox
+        title_x = LABEL_X + lmax + 1.2
+        self.local_bbox = (x1, y1, title_x + 0.8, y2)
+        for prop in find(self.tree, 'property'):
+            layer = find1(prop, 'layer')
+            if prop[1] == 'Reference':
+                layer[1] = 'F.Fab'
+            elif prop[1] == 'Value':
+                layer[1] = 'F.SilkS'
+                at = find1(prop, 'at')
+                at[1:] = [round(title_x, 3), round((y1 + y2) / 2, 3), 270]
 
     def _courtyard(self):
         xs, ys = [], []
@@ -181,13 +206,22 @@ def pack_rows(parts, x0, y0, width, gap):
     return used_w, y + row_h - y0
 
 
+def pack_bottom(parts, x0, y0, width, gap):
+    """One row along the bottom edge: parts of different heights share a bottom line."""
+    pack_rows(parts, x0, y0, width, gap)
+    low = max(p.bbox()[3] for p in parts)
+    for p in parts:
+        x1, y1, _, y2 = p.bbox()
+        p.move_to(x1, y1 + low - y2)
+
+
 def place(parts, pinnet, gap):
     def signal_nets(ref):
         return {n for (r, _), n in pinnet.items() if r == ref and n not in POWER_NETS
                 and not n.startswith('unconnected')}
 
     ics = sorted((r for r in parts if r.startswith('IC')), key=lambda r: int(r[2:]))
-    conns = [r for r in ('J3', 'J4', 'J5', 'J1', 'J2', 'J12') if r in parts]
+    conns = [r for r in ('J3', 'J4', 'J5', 'J1', 'J2', 'J13', 'J14', 'J15', 'J12') if r in parts]
     pads = sorted((r for r in parts if r.startswith('TP')), key=lambda r: int(r[2:]))
     holes = [r for r in parts if is_hole(r)]
     others = [r for r in parts if r not in ics + conns + pads + holes]
@@ -214,7 +248,10 @@ def place(parts, pinnet, gap):
             parts[r].rot = 90
 
     top = [parts[r] for r in conns if r in ('J3', 'J4', 'J5')]
-    bot = [parts[r] for r in conns if r in ('J1', 'J2', 'J12')]     # J12: power input
+    bot = [parts[r] for r in conns if r not in ('J3', 'J4', 'J5')]  # J12: power input
+    for p in bot:
+        if p.is_jumper():      # pad strips lie along the board edge, labels inwards
+            p.rot = 90
     width = max(sum(p.size()[0] for p in top) + 2 * gap * (len(top) - 1),
                 sum(p.size()[0] for p in bot) + 2 * gap * (len(bot) - 1))
     # the connector rows start clear of the corner mounting holes
@@ -318,12 +355,12 @@ def place(parts, pinnet, gap):
     # Second pass: put the bottom connector row (J1, J2, J12) where that layout ends,
     # so parts wired to it are pulled down towards it too, then search again.
     _, bottom = skyline(best, False)
-    pack_rows(bot, x0 + hx, bottom, width - 2 * hx + 1, 2 * gap)
+    pack_bottom(bot, x0 + hx, bottom, width - 2 * hx + 1, 2 * gap)
     fixed.update({p.ref: centre(p) for p in bot})
     best = min(orders, key=lambda o: skyline(o, False)[0])
     score, bottom = skyline(best, True)
     print(f'estimated signal wire {score - HEIGHT_W * bottom:.0f} mm', file=sys.stderr)
-    pack_rows(bot, x0 + hx, bottom, width - 2 * hx + 1, 2 * gap)
+    pack_bottom(bot, x0 + hx, bottom, width - 2 * hx + 1, 2 * gap)
     return x0, x0 + width
 
 
@@ -373,6 +410,18 @@ def write(parts, netnames, out, edge):
         s.append(f'\t(net {i} {dump(n)})')
     for ref in sorted(parts, key=lambda r: (r.rstrip('0123456789'), int(r[len(r.rstrip('0123456789')):]))):
         s.append('\t' + dump(parts[ref].emit(netcode), 1))
+    for ref, p in sorted(parts.items()):
+        if not p.is_jumper():
+            continue
+        local = {q[1]: q for q in find(p.tree, 'pad')}
+        for num, net in sorted(p.nets.items(), key=lambda kv: int(kv[0])):
+            if not net:
+                continue
+            at = find1(local[num], 'at')
+            x, y = p._xf(float(at[1]) + LABEL_X, float(at[2]))
+            s.append(f'\t(gr_text {dump(net.lstrip("/"))} (at {x:.4f} {y:.4f} {p.rot % 360}) (layer "F.SilkS") '
+                     f'(uuid "{uid("label", ref, num)}") (effects (font (size {LABEL_SIZE} {LABEL_SIZE}) '
+                     f'(thickness 0.12)) (justify left)))')
     s.append(f'\t(gr_rect (start {ex1} {ey1}) (end {ex2} {ey2}) (stroke (width 0.1) (type default)) '
              f'(fill no) (layer "Edge.Cuts") (uuid "{uid("edge")}"))')
     s.append(f'\t(gr_text "SWTPC AC-30 reproduction" (at {ex1 + 1.5} {ey2 - 1.5} 0) (layer "F.Fab") '

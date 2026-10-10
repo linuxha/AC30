@@ -506,15 +506,14 @@
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
-        "name": "Default",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 2147483647,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.25,
-        "tuning_profile": "",
         "via_diameter": 0.8,
         "via_drill": 0.4,
-        "wire_width": 6
+        "wire_width": 6,
+        "name": "Default",
+        "priority": 2147483647
       },
       {
         "bus_width": 12,
@@ -525,19 +524,18 @@
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
-        "name": "Power",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 0,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.6,
-        "tuning_profile": "",
         "via_diameter": 1.0,
         "via_drill": 0.5,
-        "wire_width": 6
+        "wire_width": 6,
+        "name": "Power",
+        "priority": 0
       }
     ],
     "meta": {
-      "version": 5
+      "version": 4
     },
     "net_colors": {},
     "netclass_assignments": {},
@@ -727,7 +725,7 @@
   "sheets": [
     [
       "d6b63109-22ec-5de8-a201-9f57760f680c",
-      "AC30_SMT"
+      "Root"
     ],
     [
       "ec20a5ce-e1ec-51d4-a782-d565ebf04659",

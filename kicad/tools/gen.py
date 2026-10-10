@@ -310,7 +310,9 @@ Transcription notes / assumptions:
 
 NOTES_SMT = """
 SMT variant (kicad-smt/AC30_SMT): every on-board part is surface mount except the Molex KK-396
-connectors and the mounting holes. 0805 R/C, SOD-123 diodes (1N4148W, BZT52C4V7), SOT-23
+connectors (J3-J5, J12), the front-panel jumper pads and the mounting holes. The front panel is
+wired to five rows of 0.1 in through-hole pads instead of the J1/J2 harness headers: J1 SWITCHES,
+J2 LEDS, J13 MOTOR, J14 MIC (AUDIO_OUT to S2) and J15 EAR (AUDIO_IN from S3). 0805 R/C, SOD-123 diodes (1N4148W, BZT52C4V7), SOT-23
 transistors (MMBT5088 for 2N5210, MMBT5087), SOIC ICs, tantalum EIA-3216 (C4, C17),
 6.3x7.7 mm aluminium C16, Bourns 3314G trimmer R16, 1206 LED D18. RLY1/RLY2 are Omron
 G6K-2F-Y (5 V coil, DPDT 1 A, both poles in parallel as the motor contact) instead of
