@@ -1,6 +1,6 @@
 # AC-30 KiCad Schematic: Claude Code Session Log
 
-Session dates: 2026-10-08 to 2026-10-10 (sections 1–16 on the 8th, 17–42 on the 9th, 43–51 on the 10th). Model: Claude Opus 5.5 (Claude Code CLI).
+Session dates: 2026-10-08 to 2026-10-10 (sections 1–16 on the 8th, 17–42 on the 9th, 43–53 on the 10th). Model: Claude Opus 5.5 (Claude Code CLI).
 
 This is a record of the chat that produced the KiCad project in `kicad/`. User messages are reproduced exactly, typos included. Claude's answers are in full for sections 1–3 and condensed from section 4 on. Claude's intermediate tool work (shell commands, image crops, file edits) is summarized rather than shown verbatim.
 
@@ -789,7 +789,37 @@ Committed `933618e` and pushed `main` (`971d1da..933618e`).
 
 ### Claude's answer
 
-Added sections 48–51, committed and pushed.
+Added sections 48–51, committed `2fc8ed8` and pushed (`933618e..2fc8ed8`).
+
+---
+
+## 52. User
+
+> generate the gerbers for both boards, commit and push
+
+### Work done (summary)
+
+1. **New script `kicad/tools/gerbers.sh`** (`tools/gerbers.sh` or `tools/gerbers.sh smt`). It writes into `<project dir>/gerbers/`:
+   - Gerbers for F.Cu, B.Cu, F/B.Mask, F/B.SilkS and Edge.Cuts (X2, Protel extensions, silkscreen with the solder mask subtracted), plus F.Paste on the SMT board, and the Gerber job file;
+   - Excellon drill files in mm, PTH and NPTH separate, with PDF drill maps and a drill report.
+
+   It then zips them as `<project>-gerbers.zip`.
+2. **`build.sh`** runs it at the end of every build, so the fabrication files follow each rebuild.
+3. **Checks.** The drill reports match the settings documents: through-hole 572 plated + 4 unplated holes, SMT 379 plated + 4 unplated. Both settings documents gained a "Fabrication files" section.
+
+### Claude's answer (condensed)
+
+Committed `b8497c1` and pushed (`2fc8ed8..b8497c1`). `kicad/AC30-gerbers.zip` (13 files) and `kicad-smt/AC30_SMT-gerbers.zip` (14 files) are ready for the board house. The Gerbers were not inspected in a viewer.
+
+---
+
+## 53. User
+
+> update AC30-Claude.md with this session, commit and push
+
+### Claude's answer
+
+Added sections 52–53, committed and pushed.
 
 ---
 
@@ -804,10 +834,11 @@ Added sections 48–51, committed and pushed.
 | PCB, SMT (`kicad-smt/AC30_SMT.*`) | 173.0 × 88.5 mm, 2 layers, SMT except the KK-396 connectors, wire pads and mounting holes, fully routed; ERC, DRC and parity clean |
 | Connectors | J3–J5 match the original artwork; J12 is the power input; the front panel wires to through-hole pads J1 SWITCHES, J2 LEDS, J13 MOTOR, J14 MIC, J15 EAR (both boards) |
 | Mounting holes | 4 × 3.2 mm, 6.35 mm in from each corner |
-| Git | `main` = `origin/main` (pushed after section 51); root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
-| Build | `cd kicad && tools/build.sh` (through-hole) or `tools/build.sh smt` (SMT): regenerate, ERC, BOM export, place, route (retry plus finishing passes), DRC, STEP export, FreeCAD check |
+| Git | `main` = `origin/main` (pushed after section 53); root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
+| Build | `cd kicad && tools/build.sh` (through-hole) or `tools/build.sh smt` (SMT): regenerate, ERC, BOM export, place, route (retry plus finishing passes), DRC, STEP export, FreeCAD check, Gerbers and drill files (`tools/gerbers.sh`) |
 | Tools | KiCad 10.0.7 AppImage, FreeRouting 2.4.1 (bundled Java 25), FreeCAD 26.3.0 AppImage |
 | Reference | `AC30-settings.md` and `AC30-SMT-settings.md`: rules, drill table, holes, connectors and wire pads, placement; `docs/AC30-BOM.md` and the KiCad BOM CSVs |
+| Fabrication | `kicad/gerbers/` + `kicad/AC30-gerbers.zip`; `kicad-smt/gerbers/` + `kicad-smt/AC30_SMT-gerbers.zip` |
 | Not placed | R39 (200K DELAY trimmer), which is on no schematic |
 
 ---
