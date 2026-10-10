@@ -19,10 +19,10 @@ All values were read from the board and project files with KiCad's own tools. Di
 
 | Item | Value |
 |---|---|
-| Size (outline) | **173.0 × 89.0 mm** (6.811 × 3.504 in) |
-| Compared with the through-hole board | 173.5 × 122.0 mm, so the SMT board has about 27% less area |
+| Size (outline) | **173.0 × 88.5 mm** (6.811 × 3.484 in) |
+| Compared with the through-hole board | 173.5 × 122.0 mm, so the SMT board has about 28% less area |
 | Outline | Rectangle on Edge.Cuts, 0.1 mm line, square corners |
-| Outline corners (KiCad page coords) | (30.0, 29.5) to (203.0, 118.5) |
+| Outline corners (KiCad page coords) | (30.0, 29.5) to (203.0, 118.0) |
 | Border | 3.0 mm from the outermost part courtyard to the board edge |
 | Layers | 2 copper (F.Cu top, B.Cu bottom), both routed as signal layers |
 | Board thickness | 1.6 mm (0.063 in) |
@@ -34,8 +34,8 @@ All values were read from the board and project files with KiCad's own tools. Di
 | Copper fill / ground plane | **None.** GND is routed as 0.6 mm tracks. |
 | Mounting holes | 4 × 3.2 mm unplated, 6.35 mm (¼ in) in from each edge, as on the original artwork |
 | Parts | 122 footprints: 109 SMD components, 4 KK-396 connectors, 5 jumper pad strips and 4 mounting holes |
-| Pads | 416 SMD pads (top) and 67 plated through-hole pads (41 connector, 26 jumper) |
-| Nets | 152 (148 signal and power nets, plus 4 single-pin nets from the relays' unused NC contacts) |
+| Pads | 416 SMD pads (top) and 77 plated through-hole pads (41 connector, 36 jumper) |
+| Nets | 156 (152 signal and power nets, plus 4 single-pin nets from the relays' unused NC contacts) |
 
 Coordinates in this document are measured from the **top-left corner of the board**, with X increasing to the right and Y increasing **downward**, as seen from the component (top) side.
 
@@ -76,12 +76,12 @@ A KiCad drill size is the **finished hole size**; the board house adds its own p
 
 | Drill (mm) | in | Number bit | Count | Plated | Used by | Pad (mm) |
 |---|---|---|---|---|---|---|
-| 0.40 | 0.0157 | #78 | 276 | yes | Signal vias | 0.8 round |
-| 0.50 | 0.0197 | #76 | 22 | yes | Power vias | 1.0 round |
-| 1.00 | 0.0394 | #60 | 26 | yes | J1, J2, J13–J15 front-panel jumper pads | 1.7 square (pin 1) / round |
+| 0.40 | 0.0157 | #78 | 284 | yes | Signal vias | 0.8 round |
+| 0.50 | 0.0197 | #76 | 18 | yes | Power vias | 1.0 round |
+| 1.00 | 0.0394 | #60 | 36 | yes | J1, J2, J13–J15 front-panel jumper pads | 1.7 square (pin 1) / round |
 | 1.70 | 0.0669 | #51 | 41 | yes | J3–J5, J12 (Molex KK-396) | 3.16 × 4.1 oval |
 | 3.20 | 0.1260 | #30, or ⅛ in | 4 | **no** | H1–H4 mounting holes | none (bare hole) |
-| **Total** | | | **369** | | 71 component and mounting holes + 298 vias | |
+| **Total** | | | **383** | | 81 component and mounting holes + 302 vias | |
 
 Most of the holes are vias. SMD pads are only on the top, so many connections drop to B.Cu through a via. The via count comes from the router and changes if the placement changes.
 
@@ -129,14 +129,14 @@ Most of the holes are vias. SMD pads are only on the top, so many connections dr
 | DRC violations | 0 (all severities, including silkscreen) |
 | Schematic parity issues | 0 |
 | ERC violations | 0 |
-| Track segments | 1,735 |
-| Vias | 298 (276 at 0.8/0.4 mm, 22 at 1.0/0.5 mm) |
+| Track segments | 1,698 |
+| Vias | 302 (284 at 0.8/0.4 mm, 18 at 1.0/0.5 mm) |
 
 | Track width | F.Cu (top) | B.Cu (bottom) |
 |---|---|---|
-| 0.25 mm | 845 segments, 2,811 mm | 506 segments, 3,203 mm |
-| 0.60 mm | 338 segments, 1,175 mm | 46 segments, 531 mm |
-| **Total** | **3,986 mm** | **3,734 mm** |
+| 0.25 mm | 861 segments, 3,324 mm | 462 segments, 2,955 mm |
+| 0.60 mm | 328 segments, 1,319 mm | 47 segments, 503 mm |
+| **Total** | **4,643 mm** | **3,458 mm** |
 
 ---
 
@@ -148,15 +148,15 @@ The holes are placed the same way as on the through-hole board: 6.35 mm (¼ in) 
 |---|---|---|---|
 | H1 | 6.35 | 6.35 | top left |
 | H2 | 166.65 | 6.35 | top right |
-| H3 | 166.65 | 82.65 | bottom right |
-| H4 | 6.35 | 82.65 | bottom left |
+| H3 | 166.65 | 82.15 | bottom right |
+| H4 | 6.35 | 82.15 | bottom left |
 
 | Item | Value |
 |---|---|
 | Hole | 3.2 mm (0.126 in) unplated, no copper pad |
 | Screw | #4 or M3; head and standoff clearance Ø6.9 mm (courtyard) |
 | Hole centres, left to right | 160.30 mm (6.311 in) |
-| Hole centres, top to bottom | 76.30 mm (3.004 in) |
+| Hole centres, top to bottom | 75.80 mm (2.984 in) |
 
 ---
 
@@ -188,35 +188,36 @@ J3–J5 and J12 are Molex KK-396 vertical headers (A-41791 series), through-hole
 | J3 (COMP) | 10 | top | 14.20 | 9.10 | 35.64 mm |
 | J4 (control) | 15 | top | 58.65 | 9.10 | 55.44 mm |
 | J5 (TERM) | 10 | top | 122.95 | 9.10 | 35.64 mm |
-| J12 (power input) | 6 | bottom | 105.30 | 80.45 | 19.80 mm |
+| J12 (power input) | 6 | bottom | 130.65 | 80.05 | 19.80 mm |
 
 ### Front-panel jumper pads
 
 The SMT board has no front-panel harness connectors. The original J1/J2 KK-396 headers are replaced by five rows of plain through-hole pads along the bottom edge, one row per group of front-panel parts. Solder hook-up wire straight from each pad to the switch, LED or jack.
 - Pads are 1.7 mm with 1.0 mm holes at 2.54 mm (0.1 in) pitch (the `PinHeader_1x…_P2.54mm_Vertical` footprints). Pin 1 is square.
 - Each pad has its net name on the silkscreen beside it, and the group name is printed above the row. The through-hole board keeps J1/J2.
-- MIC carries the record audio to the RECORD A/B switch (S2) pole, and S2 selects the MIC A or MIC B jack. EAR carries the playback audio from the PLAY A/B switch (S3) pole, and S3 selects EAR A or EAR B. The jack sleeves go to the GND pad of the same row.
+- Every wire has its own pad. The RECORD A/B (S2) and PLAY A/B (S3) audio poles wire to the SWITCHES row (AUDIO_OUT, MIC_A, MIC_B and AUDIO_IN, EAR_A, EAR_B). The four jacks wire to the MIC and EAR rows, each jack to a tip pad and its own GND pad. The board joins the MIC_x and EAR_x pads of the two rows.
 
 | Ref | Group | Pads | Pin 1 X | Pin 1 Y | Pads, from pin 1 (left) |
 |---|---|---|---|---|---|
-| J1 | SWITCHES | 13 | 13.60 | 84.10 | +5V, GND, CARRIER_EN_N, MAN_MOTOR, REC_SET, REC_RST, READ_SET, READ_RST, LOCAL_REMOTE, REC_RLY_DRV, READ_RLY_DRV, RELAY_1, RELAY_2 |
-| J2 | LEDS | 5 | 51.60 | 84.10 | +5V, LED_REC_RDY, LED_READ_RDY, LED_REC_DATA, LED_READ_DATA |
-| J13 | MOTOR | 4 | 69.30 | 84.10 | MOTOR_1A, MOTOR_1B, MOTOR_2A, MOTOR_2B |
-| J14 | MIC | 2 | 84.45 | 84.10 | AUDIO_OUT, GND |
-| J15 | EAR | 2 | 94.55 | 84.10 | AUDIO_IN, GND |
+| J1 | SWITCHES | 19 | 13.60 | 83.70 | +5V, GND, CARRIER_EN_N, MAN_MOTOR, REC_SET, REC_RST, READ_SET, READ_RST, LOCAL_REMOTE, AUDIO_OUT, MIC_A, MIC_B, REC_RLY_DRV, RELAY_1, RELAY_2, READ_RLY_DRV, AUDIO_IN, EAR_A, EAR_B |
+| J2 | LEDS | 5 | 66.85 | 83.70 | +5V, LED_REC_RDY, LED_READ_RDY, LED_REC_DATA, LED_READ_DATA |
+| J13 | MOTOR | 4 | 84.55 | 83.70 | MOTOR_1A, MOTOR_1B (MOTOR A jack), MOTOR_2A, MOTOR_2B (MOTOR B jack) |
+| J14 | MIC | 4 | 99.70 | 83.70 | MIC_A, GND (MIC A jack), MIC_B, GND (MIC B jack) |
+| J15 | EAR | 4 | 114.85 | 83.70 | EAR_A, GND (EAR A jack), EAR_B, GND (EAR B jack) |
 
 What each switch pad goes to:
 
 | Front-panel part | Pads |
 |---|---|
 | S1 MOTOR CONTROL AUTO/MAN | pole 1: CARRIER_EN_N (common), GND (MAN); pole 2: MAN_MOTOR (common), +5V (MAN) |
-| S2 RECORD A/B | pole 1: MIC row AUDIO_OUT to the MIC A / MIC B jack tips; pole 2: REC_RLY_DRV (common), RELAY_1 (A), RELAY_2 (B) |
-| S3 PLAY A/B | pole 1: READ_RLY_DRV (common), RELAY_1 (A), RELAY_2 (B); pole 2: EAR row AUDIO_IN to the EAR A / EAR B jack tips |
+| S2 RECORD A/B | pole 1: AUDIO_OUT (common), MIC_A (A), MIC_B (B); pole 2: REC_RLY_DRV (common), RELAY_1 (A), RELAY_2 (B) |
+| S3 PLAY A/B | pole 1: READ_RLY_DRV (common), RELAY_1 (A), RELAY_2 (B); pole 2: AUDIO_IN (common), EAR_A (A), EAR_B (B) |
 | S4 RECORD ON/OFF | +5V (common), REC_SET, REC_RST (momentary) |
 | S5 READER ON/OFF | +5V (common), READ_SET, READ_RST (momentary) |
 | S7 LOCAL/REMOTE | LOCAL_REMOTE (common), GND |
 | LEDs D19–D22 | anodes to the LEDS row +5V; cathodes to LED_REC_RDY, LED_READ_RDY, LED_REC_DATA, LED_READ_DATA |
-| Motor jacks J10 / J11 | MOTOR_1A / 1B (tip / sleeve) and MOTOR_2A / 2B |
+| Motor jacks J10 / J11 | MOTOR row: MOTOR_1A / 1B (tip / sleeve) and MOTOR_2A / 2B |
+| MIC jacks J6 / J7, EAR jacks J8 / J9 | MIC row: MIC_A + GND, MIC_B + GND; EAR row: EAR_A + GND, EAR_B + GND (tip + sleeve) |
 
 ---
 
@@ -254,7 +255,7 @@ Through-hole equivalents are in brackets where the part changed.
 | Bourns 3314G | 20K trim (Bourns 3386P) | 1 | R16 |
 | Omron G6K-2F-Y | 5 V DPDT relay (6 V SIL reed relay) | 2 | RLY1, RLY2 |
 | KK-396 through-hole | 1×6, 1×10, 1×15 headers | 4 | J12, J3 and J5, J4 |
-| Through-hole jumper pads (0.1 in) | 1×2, 1×4, 1×5, 1×13 rows | 5 | J14 and J15, J13, J2, J1 |
+| Through-hole jumper pads (0.1 in) | 1×4, 1×5, 1×19 rows | 5 | J13, J14 and J15, J2, J1 |
 
 **Notes on the substitutions:**
 - **Relays:** the KiCad library has no SMD reed relay, so RLY1/RLY2 are Omron G6K-2F-Y signal relays (5 V coil, 1 A contacts). The coil is pins 1/8 and RELAY_x drives pin 1. Both poles (COM 3/6, NO 4/5) are in parallel as the motor contact, and the NC pins 2/7 are unused. **Check the coil polarity mark against the Omron datasheet before ordering.**
@@ -272,128 +273,128 @@ For a machine-ready position file (origin bottom-left, Y up), run `kicad-cli pcb
 
 | Ref | Value | Footprint | Centre X | Centre Y | Pin 1 X | Pin 1 Y | Rot |
 |---|---|---|---|---|---|---|---|
-| C1 | 1000pF | C_0805_2012Metric | 114.25 | 44.10 | 114.25 | 45.05 | 90 |
-| C2 | 2000pF | C_0805_2012Metric | 119.10 | 19.20 | 119.10 | 20.15 | 90 |
-| C3 | 0.022uF | C_0805_2012Metric | 110.00 | 50.65 | 110.00 | 51.60 | 90 |
-| C4 | 1uF 15V | CP_EIA-3216-18_Kemet-A | 115.05 | 19.80 | 115.05 | 21.15 | 90 |
-| C5 | 0.01uF | C_0805_2012Metric | 123.05 | 19.20 | 123.05 | 20.15 | 90 |
-| C6 | 1000pF | C_0805_2012Metric | 156.30 | 39.65 | 156.30 | 40.60 | 90 |
-| C7 | 0.047uF | C_0805_2012Metric | 152.00 | 46.35 | 152.00 | 47.30 | 90 |
-| C8 | 0.022uF | C_0805_2012Metric | 155.95 | 46.35 | 155.95 | 47.30 | 90 |
-| C9 | 0.047uF | C_0805_2012Metric | 130.00 | 30.35 | 130.00 | 31.30 | 90 |
-| C10 | 2700pF | C_0805_2012Metric | 159.90 | 46.35 | 159.90 | 47.30 | 90 |
-| C11 | 470pF | C_0805_2012Metric | 133.95 | 30.35 | 133.95 | 31.30 | 90 |
-| C12 | 1000pF | C_0805_2012Metric | 31.30 | 30.60 | 31.30 | 31.55 | 90 |
-| C13 | 1000pF | C_0805_2012Metric | 35.25 | 30.60 | 35.25 | 31.55 | 90 |
-| C14 | 1000pF | C_0805_2012Metric | 39.20 | 30.60 | 39.20 | 31.55 | 90 |
-| C15 | 1000pF | C_0805_2012Metric | 43.15 | 30.60 | 43.15 | 31.55 | 90 |
-| C16 | 100uF 16V | CP_Elec_6.3x7.7 | 38.95 | 22.20 | 38.95 | 24.90 | 90 |
-| C17 | 10uF 10V tant | CP_EIA-3216-18_Kemet-A | 13.45 | 19.80 | 13.45 | 21.15 | 90 |
-| C18 | 0.01uF | C_0805_2012Metric | 4.00 | 26.60 | 4.00 | 27.55 | 90 |
-| C19 | 470pF | C_0805_2012Metric | 73.00 | 43.75 | 73.00 | 44.70 | 90 |
-| C20 | 470pF | C_0805_2012Metric | 76.95 | 43.75 | 76.95 | 44.70 | 90 |
-| C23 | 0.1uF | C_0805_2012Metric | 14.00 | 64.70 | 14.00 | 65.65 | 90 |
-| C24 | 0.1uF | C_0805_2012Metric | 17.95 | 64.70 | 17.95 | 65.65 | 90 |
-| C25 | 0.1uF | C_0805_2012Metric | 21.90 | 64.70 | 21.90 | 65.65 | 90 |
-| D1 | 1N4148W | D_SOD-123 | 106.55 | 19.85 | 106.55 | 21.50 | 90 |
-| D2 | 1N4148W | D_SOD-123 | 110.85 | 19.85 | 110.85 | 21.50 | 90 |
-| D3 | BZT52C4V7 4.7V | D_SOD-123 | 159.15 | 31.00 | 159.15 | 32.65 | 90 |
-| D4 | 1N4148W | D_SOD-123 | 152.15 | 40.30 | 152.15 | 41.95 | 90 |
-| D5 | 1N4148W | D_SOD-123 | 27.15 | 31.25 | 27.15 | 32.90 | 90 |
-| D6 | 1N4148W | D_SOD-123 | 14.15 | 33.65 | 14.15 | 35.30 | 90 |
-| D7 | 1N4148W | D_SOD-123 | 18.45 | 33.65 | 18.45 | 35.30 | 90 |
-| D8 | 1N4148W | D_SOD-123 | 49.15 | 44.40 | 49.15 | 46.05 | 90 |
-| D9 | 1N4148W | D_SOD-123 | 53.45 | 44.40 | 53.45 | 46.05 | 90 |
-| D10 | 1N4148W | D_SOD-123 | 49.15 | 51.10 | 49.15 | 52.75 | 90 |
-| D11 | 1N4148W | D_SOD-123 | 53.45 | 51.10 | 53.45 | 52.75 | 90 |
-| D18 | LED | LED_1206_3216Metric | 110.15 | 44.70 | 110.15 | 46.10 | 90 |
+| C1 | 1000pF | C_0805_2012Metric | 65.25 | 44.10 | 65.25 | 45.05 | 90 |
+| C2 | 2000pF | C_0805_2012Metric | 61.10 | 19.20 | 61.10 | 20.15 | 90 |
+| C3 | 0.022uF | C_0805_2012Metric | 61.00 | 50.65 | 61.00 | 51.60 | 90 |
+| C4 | 1uF 15V | CP_EIA-3216-18_Kemet-A | 57.05 | 19.80 | 57.05 | 21.15 | 90 |
+| C5 | 0.01uF | C_0805_2012Metric | 65.05 | 19.20 | 65.05 | 20.15 | 90 |
+| C6 | 1000pF | C_0805_2012Metric | 30.30 | 39.65 | 30.30 | 40.60 | 90 |
+| C7 | 0.047uF | C_0805_2012Metric | 26.00 | 46.35 | 26.00 | 47.30 | 90 |
+| C8 | 0.022uF | C_0805_2012Metric | 29.95 | 46.35 | 29.95 | 47.30 | 90 |
+| C9 | 0.047uF | C_0805_2012Metric | 15.00 | 30.35 | 15.00 | 31.30 | 90 |
+| C10 | 2700pF | C_0805_2012Metric | 33.90 | 46.35 | 33.90 | 47.30 | 90 |
+| C11 | 470pF | C_0805_2012Metric | 18.95 | 30.35 | 18.95 | 31.30 | 90 |
+| C12 | 1000pF | C_0805_2012Metric | 43.30 | 44.35 | 43.30 | 45.30 | 90 |
+| C13 | 1000pF | C_0805_2012Metric | 47.25 | 44.35 | 47.25 | 45.30 | 90 |
+| C14 | 1000pF | C_0805_2012Metric | 51.20 | 44.35 | 51.20 | 45.30 | 90 |
+| C15 | 1000pF | C_0805_2012Metric | 55.15 | 44.35 | 55.15 | 45.30 | 90 |
+| C16 | 100uF 16V | CP_Elec_6.3x7.7 | 50.95 | 35.95 | 50.95 | 38.65 | 90 |
+| C17 | 10uF 10V tant | CP_EIA-3216-18_Kemet-A | 158.45 | 19.80 | 158.45 | 21.15 | 90 |
+| C18 | 0.01uF | C_0805_2012Metric | 149.00 | 26.60 | 149.00 | 27.55 | 90 |
+| C19 | 470pF | C_0805_2012Metric | 138.00 | 30.35 | 138.00 | 31.30 | 90 |
+| C20 | 470pF | C_0805_2012Metric | 141.95 | 30.35 | 141.95 | 31.30 | 90 |
+| C23 | 0.1uF | C_0805_2012Metric | 97.00 | 64.30 | 97.00 | 65.25 | 90 |
+| C24 | 0.1uF | C_0805_2012Metric | 100.95 | 64.30 | 100.95 | 65.25 | 90 |
+| C25 | 0.1uF | C_0805_2012Metric | 104.90 | 64.30 | 104.90 | 65.25 | 90 |
+| D1 | 1N4148W | D_SOD-123 | 48.55 | 19.85 | 48.55 | 21.50 | 90 |
+| D2 | 1N4148W | D_SOD-123 | 52.85 | 19.85 | 52.85 | 21.50 | 90 |
+| D3 | BZT52C4V7 4.7V | D_SOD-123 | 33.15 | 31.00 | 33.15 | 32.65 | 90 |
+| D4 | 1N4148W | D_SOD-123 | 26.15 | 40.30 | 26.15 | 41.95 | 90 |
+| D5 | 1N4148W | D_SOD-123 | 39.15 | 45.00 | 39.15 | 46.65 | 90 |
+| D6 | 1N4148W | D_SOD-123 | 97.15 | 33.25 | 97.15 | 34.90 | 90 |
+| D7 | 1N4148W | D_SOD-123 | 101.45 | 33.25 | 101.45 | 34.90 | 90 |
+| D8 | 1N4148W | D_SOD-123 | 73.15 | 32.25 | 73.15 | 33.90 | 90 |
+| D9 | 1N4148W | D_SOD-123 | 77.45 | 32.25 | 77.45 | 33.90 | 90 |
+| D10 | 1N4148W | D_SOD-123 | 73.15 | 38.95 | 73.15 | 40.60 | 90 |
+| D11 | 1N4148W | D_SOD-123 | 77.45 | 38.95 | 77.45 | 40.60 | 90 |
+| D18 | LED | LED_1206_3216Metric | 61.15 | 44.70 | 61.15 | 46.10 | 90 |
 | H1 | MountingHole | MountingHole_3.2mm_M3 | 6.35 | 6.35 | 6.35 | 6.35 | 0 |
 | H2 | MountingHole | MountingHole_3.2mm_M3 | 166.65 | 6.35 | 166.65 | 6.35 | 0 |
-| H3 | MountingHole | MountingHole_3.2mm_M3 | 166.65 | 82.65 | 166.65 | 82.65 | 0 |
-| H4 | MountingHole | MountingHole_3.2mm_M3 | 6.35 | 82.65 | 6.35 | 82.65 | 0 |
-| IC1 | 4013 | SOIC-14_3.9x8.7mm_P1.27mm | 143.70 | 22.10 | 141.22 | 18.29 | 0 |
-| IC2 | 4001 | SOIC-14_3.9x8.7mm_P1.27mm | 132.70 | 22.10 | 130.22 | 18.29 | 0 |
-| IC3 | 4070 | SOIC-14_3.9x8.7mm_P1.27mm | 154.70 | 22.10 | 152.22 | 18.29 | 0 |
-| IC4 | 4558 | SOIC-8_3.9x4.9mm_P1.27mm | 99.70 | 20.20 | 97.22 | 18.30 | 0 |
-| IC5 | 4013 | SOIC-14_3.9x8.7mm_P1.27mm | 112.70 | 35.85 | 110.22 | 32.04 | 0 |
-| IC6 | 4053 | SOIC-16_3.9x9.9mm_P1.27mm | 51.70 | 34.85 | 49.22 | 30.41 | 0 |
-| IC7 | 4049 | SOIC-16_3.9x9.9mm_P1.27mm | 62.70 | 34.85 | 60.22 | 30.41 | 0 |
-| IC8 | 4013 | SOIC-14_3.9x8.7mm_P1.27mm | 29.70 | 22.10 | 27.23 | 18.29 | 0 |
-| IC9 | 4023 | SOIC-14_3.9x8.7mm_P1.27mm | 99.70 | 35.85 | 97.22 | 32.04 | 0 |
-| IC10 | 555 | SOIC-8_3.9x4.9mm_P1.27mm | 6.70 | 20.20 | 4.23 | 18.30 | 0 |
-| IC11 | 4001 | SOIC-14_3.9x8.7mm_P1.27mm | 64.70 | 22.10 | 62.22 | 18.29 | 0 |
-| IC12 | 1489 | SOIC-14_3.9x8.7mm_P1.27mm | 53.70 | 22.10 | 51.22 | 18.29 | 0 |
+| H3 | MountingHole | MountingHole_3.2mm_M3 | 166.65 | 82.15 | 166.65 | 82.15 | 0 |
+| H4 | MountingHole | MountingHole_3.2mm_M3 | 6.35 | 82.15 | 6.35 | 82.15 | 0 |
+| IC1 | 4013 | SOIC-14_3.9x8.7mm_P1.27mm | 6.70 | 22.10 | 4.23 | 18.29 | 0 |
+| IC2 | 4001 | SOIC-14_3.9x8.7mm_P1.27mm | 17.70 | 22.10 | 15.23 | 18.29 | 0 |
+| IC3 | 4070 | SOIC-14_3.9x8.7mm_P1.27mm | 28.70 | 22.10 | 26.23 | 18.29 | 0 |
+| IC4 | 4558 | SOIC-8_3.9x4.9mm_P1.27mm | 41.70 | 20.20 | 39.22 | 18.30 | 0 |
+| IC5 | 4013 | SOIC-14_3.9x8.7mm_P1.27mm | 63.70 | 35.85 | 61.22 | 32.04 | 0 |
+| IC6 | 4053 | SOIC-16_3.9x9.9mm_P1.27mm | 75.70 | 22.70 | 73.22 | 18.26 | 0 |
+| IC7 | 4049 | SOIC-16_3.9x9.9mm_P1.27mm | 125.70 | 34.85 | 123.22 | 30.41 | 0 |
+| IC8 | 4013 | SOIC-14_3.9x8.7mm_P1.27mm | 41.70 | 35.85 | 39.22 | 32.04 | 0 |
+| IC9 | 4023 | SOIC-14_3.9x8.7mm_P1.27mm | 112.70 | 34.25 | 110.22 | 30.44 | 0 |
+| IC10 | 555 | SOIC-8_3.9x4.9mm_P1.27mm | 151.70 | 20.20 | 149.22 | 18.30 | 0 |
+| IC11 | 4001 | SOIC-14_3.9x8.7mm_P1.27mm | 110.70 | 22.10 | 108.22 | 18.29 | 0 |
+| IC12 | 1489 | SOIC-14_3.9x8.7mm_P1.27mm | 121.70 | 22.10 | 119.22 | 18.29 | 0 |
 | IC13 | 4070 | SOIC-14_3.9x8.7mm_P1.27mm | 86.70 | 22.10 | 84.22 | 18.29 | 0 |
-| IC14 | 4053 | SOIC-16_3.9x9.9mm_P1.27mm | 75.70 | 22.70 | 73.22 | 18.26 | 0 |
-| IC15 | 1488 | SOIC-14_3.9x8.7mm_P1.27mm | 75.70 | 35.50 | 73.22 | 31.69 | 0 |
-| J1 | SWITCHES | PinHeader_1x13_P2.54mm_Vertical | 13.60 | 84.10 | 13.60 | 84.10 | 90 |
-| J2 | LEDS | PinHeader_1x05_P2.54mm_Vertical | 51.60 | 84.10 | 51.60 | 84.10 | 90 |
+| IC14 | 4053 | SOIC-16_3.9x9.9mm_P1.27mm | 99.70 | 22.70 | 97.22 | 18.26 | 0 |
+| IC15 | 1488 | SOIC-14_3.9x8.7mm_P1.27mm | 140.70 | 22.10 | 138.22 | 18.29 | 0 |
+| J1 | SWITCHES | PinHeader_1x19_P2.54mm_Vertical | 13.60 | 83.70 | 13.60 | 83.70 | 90 |
+| J2 | LEDS | PinHeader_1x05_P2.54mm_Vertical | 66.85 | 83.70 | 66.85 | 83.70 | 90 |
 | J3 | Computer interface (COMP) | Molex_KK-396_A-41791-0010_1x10_P3.96mm_Vertical | 14.20 | 9.10 | 14.20 | 9.10 | 0 |
 | J4 | Control interface | Molex_KK-396_A-41791-0015_1x15_P3.96mm_Vertical | 58.65 | 9.10 | 58.65 | 9.10 | 0 |
 | J5 | Terminal interface (TERM) | Molex_KK-396_A-41791-0010_1x10_P3.96mm_Vertical | 122.95 | 9.10 | 122.95 | 9.10 | 0 |
-| J12 | Power input | Molex_KK-396_A-41791-0006_1x06_P3.96mm_Vertical | 105.30 | 80.45 | 105.30 | 80.45 | 0 |
-| J13 | MOTOR | PinHeader_1x04_P2.54mm_Vertical | 69.30 | 84.10 | 69.30 | 84.10 | 90 |
-| J14 | MIC | PinHeader_1x02_P2.54mm_Vertical | 84.45 | 84.10 | 84.45 | 84.10 | 90 |
-| J15 | EAR | PinHeader_1x02_P2.54mm_Vertical | 94.55 | 84.10 | 94.55 | 84.10 | 90 |
-| Q1 | MMBT5088 | SOT-23 | 152.95 | 51.75 | 152.01 | 50.80 | 0 |
-| Q2 | MMBT5088 | SOT-23 | 130.95 | 35.75 | 130.01 | 34.80 | 0 |
-| Q3 | MMBT5087 | SOT-23 | 158.80 | 51.75 | 157.86 | 50.80 | 0 |
-| Q4 | MMBT5088 | SOT-23 | 49.95 | 57.15 | 49.01 | 56.20 | 0 |
-| Q5 | MMBT5088 | SOT-23 | 97.95 | 44.10 | 97.01 | 43.15 | 0 |
-| Q6 | MMBT5088 | SOT-23 | 103.80 | 44.10 | 102.86 | 43.15 | 0 |
-| Q7 | MMBT5088 | SOT-23 | 60.95 | 43.75 | 60.01 | 42.80 | 0 |
-| Q8 | MMBT5088 | SOT-23 | 66.80 | 43.75 | 65.86 | 42.80 | 0 |
-| Q9 | MMBT5087 | SOT-23 | 27.95 | 37.30 | 27.01 | 36.35 | 0 |
-| Q10 | MMBT5087 | SOT-23 | 33.80 | 37.30 | 32.86 | 36.35 | 0 |
-| Q11 | MMBT5087 | SOT-23 | 8.90 | 26.60 | 7.96 | 25.65 | 0 |
-| R1 | 33K | R_0805_2012Metric | 113.85 | 56.05 | 113.85 | 56.96 | 90 |
-| R2 | 10K | R_0805_2012Metric | 109.95 | 61.40 | 109.95 | 62.31 | 90 |
-| R3 | 10K | R_0805_2012Metric | 113.85 | 61.40 | 113.85 | 62.31 | 90 |
-| R4 | 330 | R_0805_2012Metric | 96.95 | 26.60 | 96.95 | 27.51 | 90 |
-| R5 | 2.2K | R_0805_2012Metric | 100.85 | 26.60 | 100.85 | 27.51 | 90 |
-| R6 | 4.7K | R_0805_2012Metric | 104.75 | 26.60 | 104.75 | 27.51 | 90 |
-| R7 | 470 | R_0805_2012Metric | 108.65 | 26.60 | 108.65 | 27.51 | 90 |
-| R8 | 100K | R_0805_2012Metric | 112.55 | 26.60 | 112.55 | 27.51 | 90 |
-| R9 | 10K | R_0805_2012Metric | 116.45 | 26.60 | 116.45 | 27.51 | 90 |
-| R10 | 330K | R_0805_2012Metric | 120.35 | 26.60 | 120.35 | 27.51 | 90 |
-| R11 | 10K | R_0805_2012Metric | 124.25 | 26.60 | 124.25 | 27.51 | 90 |
-| R12 | 10K | R_0805_2012Metric | 151.95 | 57.15 | 151.95 | 58.06 | 90 |
-| R13 | 22K | R_0805_2012Metric | 155.85 | 57.15 | 155.85 | 58.06 | 90 |
-| R14 | 22K | R_0805_2012Metric | 135.80 | 35.75 | 135.80 | 36.66 | 90 |
-| R15 | 10K | R_0805_2012Metric | 159.75 | 57.15 | 159.75 | 58.06 | 90 |
-| R16 | 20K trim | Potentiometer_Bourns_3314G_Vertical | 153.50 | 32.30 | 154.65 | 29.55 | 0 |
-| R17 | 100K | R_0805_2012Metric | 151.95 | 62.50 | 151.95 | 63.41 | 90 |
-| R18 | 100K | R_0805_2012Metric | 129.95 | 41.15 | 129.95 | 42.06 | 90 |
-| R19 | 10K | R_0805_2012Metric | 155.85 | 62.50 | 155.85 | 63.41 | 90 |
-| R20 | 10K | R_0805_2012Metric | 159.75 | 62.50 | 159.75 | 63.41 | 90 |
-| R21 | 10K | R_0805_2012Metric | 133.85 | 41.15 | 133.85 | 42.06 | 90 |
-| R22 | 10K | R_0805_2012Metric | 54.80 | 57.15 | 54.80 | 58.06 | 90 |
-| R23 | 100K | R_0805_2012Metric | 38.65 | 37.30 | 38.65 | 38.21 | 90 |
-| R24 | 100K | R_0805_2012Metric | 42.55 | 37.30 | 42.55 | 38.21 | 90 |
-| R25 | 100K | R_0805_2012Metric | 26.95 | 42.70 | 26.95 | 43.61 | 90 |
-| R26 | 100K | R_0805_2012Metric | 30.85 | 42.70 | 30.85 | 43.61 | 90 |
-| R27 | 10K | R_0805_2012Metric | 34.75 | 42.70 | 34.75 | 43.61 | 90 |
-| R28 | 10K | R_0805_2012Metric | 96.95 | 49.50 | 96.95 | 50.41 | 90 |
-| R29 | 10K | R_0805_2012Metric | 100.85 | 49.50 | 100.85 | 50.41 | 90 |
-| R30 | 470 | R_0805_2012Metric | 104.75 | 49.50 | 104.75 | 50.41 | 90 |
-| R31 | 470 | R_0805_2012Metric | 96.95 | 54.85 | 96.95 | 55.76 | 90 |
-| R32 | 10K | R_0805_2012Metric | 38.65 | 42.70 | 38.65 | 43.61 | 90 |
-| R33 | 10K | R_0805_2012Metric | 42.55 | 42.70 | 42.55 | 43.61 | 90 |
-| R34 | 10K | R_0805_2012Metric | 59.95 | 49.15 | 59.95 | 50.06 | 90 |
-| R35 | 470 | R_0805_2012Metric | 63.85 | 49.15 | 63.85 | 50.06 | 90 |
-| R36 | 10K | R_0805_2012Metric | 67.75 | 49.15 | 67.75 | 50.06 | 90 |
-| R37 | 470 | R_0805_2012Metric | 59.95 | 54.50 | 59.95 | 55.41 | 90 |
-| R38 | 47K | R_0805_2012Metric | 13.75 | 26.60 | 13.75 | 27.51 | 90 |
-| R40 | 10K | R_0805_2012Metric | 113.90 | 50.65 | 113.90 | 51.56 | 90 |
-| R41 | 10K | R_0805_2012Metric | 63.85 | 54.50 | 63.85 | 55.41 | 90 |
+| J12 | Power input | Molex_KK-396_A-41791-0006_1x06_P3.96mm_Vertical | 130.65 | 80.05 | 130.65 | 80.05 | 0 |
+| J13 | MOTOR | PinHeader_1x04_P2.54mm_Vertical | 84.55 | 83.70 | 84.55 | 83.70 | 90 |
+| J14 | MIC | PinHeader_1x04_P2.54mm_Vertical | 99.70 | 83.70 | 99.70 | 83.70 | 90 |
+| J15 | EAR | PinHeader_1x04_P2.54mm_Vertical | 114.85 | 83.70 | 114.85 | 83.70 | 90 |
+| Q1 | MMBT5088 | SOT-23 | 26.95 | 51.75 | 26.01 | 50.80 | 0 |
+| Q2 | MMBT5088 | SOT-23 | 15.95 | 35.75 | 15.01 | 34.80 | 0 |
+| Q3 | MMBT5087 | SOT-23 | 32.80 | 51.75 | 31.86 | 50.80 | 0 |
+| Q4 | MMBT5088 | SOT-23 | 73.95 | 45.00 | 73.01 | 44.05 | 0 |
+| Q5 | MMBT5088 | SOT-23 | 110.95 | 42.50 | 110.01 | 41.55 | 0 |
+| Q6 | MMBT5088 | SOT-23 | 116.80 | 42.50 | 115.86 | 41.55 | 0 |
+| Q7 | MMBT5088 | SOT-23 | 123.95 | 43.75 | 123.01 | 42.80 | 0 |
+| Q8 | MMBT5088 | SOT-23 | 129.80 | 43.75 | 128.86 | 42.80 | 0 |
+| Q9 | MMBT5087 | SOT-23 | 39.95 | 51.05 | 39.01 | 50.10 | 0 |
+| Q10 | MMBT5087 | SOT-23 | 45.80 | 51.05 | 44.86 | 50.10 | 0 |
+| Q11 | MMBT5087 | SOT-23 | 153.90 | 26.60 | 152.96 | 25.65 | 0 |
+| R1 | 33K | R_0805_2012Metric | 64.85 | 56.05 | 64.85 | 56.96 | 90 |
+| R2 | 10K | R_0805_2012Metric | 60.95 | 61.40 | 60.95 | 62.31 | 90 |
+| R3 | 10K | R_0805_2012Metric | 64.85 | 61.40 | 64.85 | 62.31 | 90 |
+| R4 | 330 | R_0805_2012Metric | 38.95 | 26.60 | 38.95 | 27.51 | 90 |
+| R5 | 2.2K | R_0805_2012Metric | 42.85 | 26.60 | 42.85 | 27.51 | 90 |
+| R6 | 4.7K | R_0805_2012Metric | 46.75 | 26.60 | 46.75 | 27.51 | 90 |
+| R7 | 470 | R_0805_2012Metric | 50.65 | 26.60 | 50.65 | 27.51 | 90 |
+| R8 | 100K | R_0805_2012Metric | 54.55 | 26.60 | 54.55 | 27.51 | 90 |
+| R9 | 10K | R_0805_2012Metric | 58.45 | 26.60 | 58.45 | 27.51 | 90 |
+| R10 | 330K | R_0805_2012Metric | 62.35 | 26.60 | 62.35 | 27.51 | 90 |
+| R11 | 10K | R_0805_2012Metric | 66.25 | 26.60 | 66.25 | 27.51 | 90 |
+| R12 | 10K | R_0805_2012Metric | 25.95 | 57.15 | 25.95 | 58.06 | 90 |
+| R13 | 22K | R_0805_2012Metric | 29.85 | 57.15 | 29.85 | 58.06 | 90 |
+| R14 | 22K | R_0805_2012Metric | 20.80 | 35.75 | 20.80 | 36.66 | 90 |
+| R15 | 10K | R_0805_2012Metric | 33.75 | 57.15 | 33.75 | 58.06 | 90 |
+| R16 | 20K trim | Potentiometer_Bourns_3314G_Vertical | 27.50 | 32.30 | 28.65 | 29.55 | 0 |
+| R17 | 100K | R_0805_2012Metric | 25.95 | 62.50 | 25.95 | 63.41 | 90 |
+| R18 | 100K | R_0805_2012Metric | 14.95 | 41.15 | 14.95 | 42.06 | 90 |
+| R19 | 10K | R_0805_2012Metric | 29.85 | 62.50 | 29.85 | 63.41 | 90 |
+| R20 | 10K | R_0805_2012Metric | 33.75 | 62.50 | 33.75 | 63.41 | 90 |
+| R21 | 10K | R_0805_2012Metric | 18.85 | 41.15 | 18.85 | 42.06 | 90 |
+| R22 | 10K | R_0805_2012Metric | 78.80 | 45.00 | 78.80 | 45.91 | 90 |
+| R23 | 100K | R_0805_2012Metric | 50.65 | 51.05 | 50.65 | 51.96 | 90 |
+| R24 | 100K | R_0805_2012Metric | 54.55 | 51.05 | 54.55 | 51.96 | 90 |
+| R25 | 100K | R_0805_2012Metric | 38.95 | 56.45 | 38.95 | 57.36 | 90 |
+| R26 | 100K | R_0805_2012Metric | 42.85 | 56.45 | 42.85 | 57.36 | 90 |
+| R27 | 10K | R_0805_2012Metric | 46.75 | 56.45 | 46.75 | 57.36 | 90 |
+| R28 | 10K | R_0805_2012Metric | 109.95 | 47.90 | 109.95 | 48.81 | 90 |
+| R29 | 10K | R_0805_2012Metric | 113.85 | 47.90 | 113.85 | 48.81 | 90 |
+| R30 | 470 | R_0805_2012Metric | 117.75 | 47.90 | 117.75 | 48.81 | 90 |
+| R31 | 470 | R_0805_2012Metric | 109.95 | 53.25 | 109.95 | 54.16 | 90 |
+| R32 | 10K | R_0805_2012Metric | 50.65 | 56.45 | 50.65 | 57.36 | 90 |
+| R33 | 10K | R_0805_2012Metric | 54.55 | 56.45 | 54.55 | 57.36 | 90 |
+| R34 | 10K | R_0805_2012Metric | 122.95 | 49.15 | 122.95 | 50.06 | 90 |
+| R35 | 470 | R_0805_2012Metric | 126.85 | 49.15 | 126.85 | 50.06 | 90 |
+| R36 | 10K | R_0805_2012Metric | 130.75 | 49.15 | 130.75 | 50.06 | 90 |
+| R37 | 470 | R_0805_2012Metric | 122.95 | 54.50 | 122.95 | 55.41 | 90 |
+| R38 | 47K | R_0805_2012Metric | 158.75 | 26.60 | 158.75 | 27.51 | 90 |
+| R40 | 10K | R_0805_2012Metric | 64.90 | 50.65 | 64.90 | 51.56 | 90 |
+| R41 | 10K | R_0805_2012Metric | 126.85 | 54.50 | 126.85 | 55.41 | 90 |
 | R42 | 10K | R_0805_2012Metric | 83.95 | 30.35 | 83.95 | 31.26 | 90 |
-| R43 | 470 | R_0805_2012Metric | 109.95 | 56.05 | 109.95 | 56.96 | 90 |
+| R43 | 470 | R_0805_2012Metric | 60.95 | 56.05 | 60.95 | 56.96 | 90 |
 | R44 | 10K | R_0805_2012Metric | 87.85 | 30.35 | 87.85 | 31.26 | 90 |
 | R45 | 10K | R_0805_2012Metric | 91.75 | 30.35 | 91.75 | 31.26 | 90 |
 | R46 | 10K | R_0805_2012Metric | 83.95 | 35.70 | 83.95 | 36.61 | 90 |
 | R47 | 10K | R_0805_2012Metric | 87.85 | 35.70 | 87.85 | 36.61 | 90 |
-| RLY1 | G6K-2F-Y 5V | Relay_DPDT_Omron_G6K-2F-Y | 17.65 | 43.25 | 14.15 | 39.45 | 0 |
-| RLY2 | G6K-2F-Y 5V | Relay_DPDT_Omron_G6K-2F-Y | 17.65 | 55.75 | 14.15 | 51.95 | 0 |
+| RLY1 | G6K-2F-Y 5V | Relay_DPDT_Omron_G6K-2F-Y | 100.65 | 42.85 | 97.15 | 39.05 | 0 |
+| RLY2 | G6K-2F-Y 5V | Relay_DPDT_Omron_G6K-2F-Y | 100.65 | 55.35 | 97.15 | 51.55 | 0 |
 ---
 
 ## 11. Tools and generator settings
@@ -415,7 +416,7 @@ Placement settings in `tools/pcb.py`:
 | Mounting-hole inset (`HOLE_INSET`) | 6.35 mm |
 | Height vs. wire weight (`AC30_HEIGHT_W`) | 25 (1 mm of board height costs the same as 25 mm of wire) |
 | Block orders tried (`AC30_ORDERS`) | 300 random orders plus 4 sorted ones, seed 30; searched twice |
-| Estimated wiring | 5,208 mm (half-perimeter estimate, every net except +5V and GND, including the bottom connector row) |
+| Estimated wiring | 5,804 mm (half-perimeter estimate, every net except +5V and GND, including the bottom connector row) |
 
 How the layout is built:
 - Discrete parts are rotated so their long side is vertical, except the relays.
@@ -429,7 +430,7 @@ How the layout is built:
 
 | Item | Value |
 |---|---|
-| Board body | 173.0 × 89.0 × 1.51 mm |
+| Board body | 173.0 × 88.5 × 1.51 mm |
 | Full assembly height | 11.5 mm |
 
 The four KK-396 connectors have no 3D model in the KiCad library and appear only as footprints. The jumper pad rows show as 0.1 in pin headers in the model; on the board they are bare pads for wires. Every SMD part has a model.

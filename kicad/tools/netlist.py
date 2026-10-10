@@ -104,7 +104,9 @@ def conn(ref, value, nets, group=GRP, sheet='main'):
 if SMT:
     # Front panel wired to plain through-hole jumper pads (0.1" strips, net names on the
     # silkscreen) instead of the J1/J2 harness connectors, one strip per panel item.
-    # MIC/EAR carry the audio to the RECORD A/B (S2) and PLAY A/B (S3) poles.
+    # Each wire gets its own pad: the RECORD A/B (S2) and PLAY A/B (S3) audio poles
+    # (common AUDIO_OUT / AUDIO_IN, throws MIC_x / EAR_x) wire to the SWITCHES strip,
+    # and the four jacks wire to the MIC and EAR strips; the board joins them.
     def jumpers(ref, value, nets):
         n = len(nets)
         add(ref, f'Connector_Generic:Conn_01x{n:02d}', value,
@@ -112,12 +114,13 @@ if SMT:
             f'Connector_PinHeader_2.54mm:PinHeader_1x{n:02d}_P2.54mm_Vertical')
 
     jumpers('J1', 'SWITCHES', [P5, G, 'CARRIER_EN_N', 'MAN_MOTOR', 'REC_SET', 'REC_RST',
-                               'READ_SET', 'READ_RST', 'LOCAL_REMOTE', 'REC_RLY_DRV',
-                               'READ_RLY_DRV', 'RELAY_1', 'RELAY_2'])
+                               'READ_SET', 'READ_RST', 'LOCAL_REMOTE',
+                               'AUDIO_OUT', 'MIC_A', 'MIC_B', 'REC_RLY_DRV', 'RELAY_1', 'RELAY_2',
+                               'READ_RLY_DRV', 'AUDIO_IN', 'EAR_A', 'EAR_B'])
     jumpers('J2', 'LEDS', [P5, 'LED_REC_RDY', 'LED_READ_RDY', 'LED_REC_DATA', 'LED_READ_DATA'])
     jumpers('J13', 'MOTOR', ['MOTOR_1A', 'MOTOR_1B', 'MOTOR_2A', 'MOTOR_2B'])
-    jumpers('J14', 'MIC', ['AUDIO_OUT', G])
-    jumpers('J15', 'EAR', ['AUDIO_IN', G])
+    jumpers('J14', 'MIC', ['MIC_A', G, 'MIC_B', G])
+    jumpers('J15', 'EAR', ['EAR_A', G, 'EAR_B', G])
 else:
     conn('J1', 'Front panel harness 1', ['MOTOR_1A', P5, 'LED_READ_DATA', G, 'RELAY_1', 'LED_REC_DATA',
                                          'MOTOR_1B', 'LOCAL_REMOTE', 'READ_RST', 'REC_RLY_DRV', 'MAN_MOTOR',
