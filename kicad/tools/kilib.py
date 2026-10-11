@@ -62,6 +62,7 @@ def pins(sym):
             at = find1(p, 'at')
             res.append(dict(unit=unit, number=find1(p, 'number')[1], name=find1(p, 'name')[1],
                             x=float(at[1]), y=float(at[2]), angle=float(at[3]) if len(at) > 3 else 0.0,
+                            length=float(find1(p, 'length')[1]) if find1(p, 'length') else 2.54,
                             etype=str(p[1])))
     return res
 

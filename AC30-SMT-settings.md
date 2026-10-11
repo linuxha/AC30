@@ -440,6 +440,10 @@ How the layout is built:
 - J3–J5 run along the top edge. The jumper pad rows (J1, J2, J13–J15, turned 90° so their labels face into the board) and J12 run along the bottom, sharing a bottom line and inset to clear the mounting holes.
 - A second search fixes the bottom connector row at its provisional height, so parts wired to it are pulled towards it.
 
+### Schematic images
+
+`kicad-smt/schematic/` holds the schematic as `AC30_SMT.pdf`, plus `AC30_SMT-sheet1.png` to `sheet3.png` (whole sheets) and one PNG per functional block (`AC30_SMT-01-…png` onwards), all written by `build.sh`. Each block is drawn with real wires (`tools/schroute.py`). Every routed net keeps one label with its name, and labels join the nets that pass between blocks and sheets. Where the router finds no room, a connection is drawn as a pair of labels instead (17 in this build).
+
 ### Fabrication files
 
 `kicad-smt/gerbers/` and `kicad-smt/AC30_SMT-gerbers.zip` (the same files, zipped for the board house) are written by `kicad/tools/gerbers.sh` at the end of every build, or on their own with `tools/gerbers.sh smt`.

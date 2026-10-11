@@ -36,7 +36,7 @@ def mc1488():
     gates = [('2',), ('4', '5'), ('9', '10'), ('12', '13')]
     outs = ['3', '6', '8', '11']
     for i, (ins, out) in enumerate(zip(gates, outs), 1):
-        body = [tri, circ, _pin(out, '~', 'output', 8.89, 0, 180, 2.54)]
+        body = [tri, circ, _pin(out, '~', 'output', 10.16, 0, 180, 3.81)]
         ys = [0] if len(ins) == 1 else [2.54, -2.54]
         for n, y in zip(ins, ys):
             body.append(_pin(n, '~', 'input', -7.62, y, 0, 2.54 if y == 0 else 3.81))
@@ -56,7 +56,7 @@ def mc1489():
         units.append(_unit('MC1489', i, [tri, circ,
                                          _pin(inp, '~', 'input', -7.62, 0, 0),
                                          _pin(ctl, 'RC', 'input', 0, -7.62, 90, 5.08),
-                                         _pin(out, '~', 'output', 8.89, 0, 180)]))
+                                         _pin(out, '~', 'output', 10.16, 0, 180, 3.81)]))
     units.append(_unit('MC1489', 5, [_box(-5.08, 5.08, 5.08, -5.08),
                                      _pin('14', 'VCC', 'power_in', 0, 7.62, 270),
                                      _pin('7', 'GND', 'power_in', 0, -7.62, 90)]))

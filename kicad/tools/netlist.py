@@ -110,7 +110,7 @@ def conn(ref, value, nets, group=GRP, sheet='main'):
 def jumpers(ref, value, nets):
     n = len(nets)
     add(ref, f'Connector_Generic:Conn_01x{n:02d}', value,
-        {1: {str(i + 1): net for i, net in enumerate(nets)}}, 'Front panel jumper pads',
+        {1: {str(i + 1): net for i, net in enumerate(nets)}}, 'Front panel switches, LEDs and jacks',
         f'Connector_PinHeader_2.54mm:PinHeader_1x{n:02d}_P2.54mm_Vertical')
 
 jumpers('J1', 'SWITCHES', [P5, G, 'CARRIER_EN_N', 'MAN_MOTOR', 'REC_SET', 'REC_RST',

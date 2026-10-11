@@ -1,7 +1,7 @@
 #!/bin/bash
 # Regenerate the schematic and PCB and run ERC/DRC using the KiCad AppImage
 # (its kicad-cli and its bundled symbol/footprint libraries).
-# <project>-BOM.csv is exported from the schematic. After routing, both copper layers
+# <project>-BOM.csv, schematic/<project>.pdf and PNG images are exported from the schematic. After routing, both copper layers
 # get a GND fill (tools/zones.py).
 # The board is autorouted with FreeRouting (ROUTE=0 places only), then <project>.step
 # is exported and checked in FreeCAD (AppImage, headless freecadcmd), and the Gerbers,
@@ -52,10 +52,14 @@ route() {
 }
 
 echo "kicad-cli $(cli version)  libraries: $ROOT/share/kicad"
-python3 -I "$TOOLS/gen.py" . >/dev/null
+AC30_GROUPS_JSON="$OUT/groups.json" python3 -I "$TOOLS/gen.py" . >/dev/null
 for f in "$P.kicad_sch" "${P}_moddemod_power.kicad_sch" "${P}_power_supply.kicad_sch"; do cli sch upgrade "$f" >/dev/null; done
 cli sch erc --exit-code-violations -o "$OUT/erc.rpt" "$P.kicad_sch" | grep -i "violations" || true
 cli sch export netlist --format kicadsexpr -o "$OUT/$P.net" "$P.kicad_sch" >/dev/null
+# Schematic as a PDF, plus PNGs of each sheet and each functional block (schematic/)
+mkdir -p schematic
+cli sch export pdf -o "schematic/$P.pdf" "$P.kicad_sch" >/dev/null
+python3 -I "$TOOLS/schimg.py" "schematic/$P.pdf" "$OUT/groups.json" schematic "$P"
 # BOM from the schematic: every part, with front-panel and power-supply parts marked
 # "Excluded from board"
 cli sch export bom -o "$P-BOM.csv" --ref-range-delimiter '' \

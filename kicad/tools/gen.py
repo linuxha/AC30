@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """Generate the AC-30 KiCad project from netlist.py.
 
-Every pin gets a short wire stub ending in a net label (or a power symbol /
-no-connect flag), so connectivity is exact while the layout stays simple.
+Each functional group is laid out on its own and its nets are drawn as wires
+(schroute.py). Every routed net keeps one label (its name, matching the PCB's net
+names); nets leaving a group are joined by those labels, power pins get power symbols
+and unused pins no-connect flags.
 
 Usage: python3 -I gen.py <output_dir>
 """
 import math, os, sys, uuid
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import kilib, customlib, netlist
+import kilib, customlib, netlist, schroute
 from sexp import q, dump, parse
 
 PROJECT = os.environ.get('AC30_PROJECT', 'AC30')    # AC30_SMT for the surface-mount variant
@@ -271,6 +273,285 @@ def emit_unit(sheet, path, part, unit, ox, oy, geo, wired, fields):
             label(sheet, net, ex, ey, g['dx'], g['dy'])
 
 
+# --------------------------------------------------------------------------- wired layout
+# Each functional group is laid out on its own: its units in rows ordered by shared
+# nets, nets with two or more pins in the group drawn as real wires (schroute.py), and
+# labels only where a net leaves the group. The finished groups are then shelf-packed.
+GAP = 6                # cells of routing room between units
+MARGIN = 4             # cells of routing room around a group
+
+
+def _cells(v):
+    return int(round(v / GRID))
+
+
+def _pin_counts():
+    total = {}
+    for part in netlist.parts:
+        for pins in part['units'].values():
+            for net in pins.values():
+                if net:
+                    total[net] = total.get(net, 0) + 1
+    return total
+
+
+TOTAL = None
+
+
+def _label_len(net):
+    return (len(net) * CHAR_W + (5 if net in netlist.GLOBAL else 2)) / GRID
+
+
+def _unit_geometry(part, u):
+    sym = kilib.get(part['lib'], custom_path(part['lib']))
+    netmap = dict(part['units'].get(0, {}))
+    netmap.update(part['units'].get(u, {}))
+    geo, _, body = instance_geometry(sym, u, netmap)
+    lens = {p['number']: p['length'] for p in kilib.pins(sym) if p['unit'] in (u, 0)}
+    for g in geo:
+        g['len'] = lens.get(g['pin']['number'], 2.54)
+    # pin tips must land on the grid: offset the origin by the fraction of a cell most
+    # tips share; a tip left off the grid keeps a plain stub and a label
+    frac = [(round((g['px'] / GRID) % 1, 2) % 1, round((g['py'] / GRID) % 1, 2) % 1) for g in geo]
+    fx, fy = max(set(frac), key=frac.count) if frac else (0.0, 0.0)
+    for g, fr in zip(geo, frac):
+        g['offgrid'] = fr != (fx, fy)
+    return dict(part=part, unit=u, geo=geo, body=body, off=(-fx * GRID, -fy * GRID))
+
+
+def _group(plist):
+    """Lay out and route one group. Returns (drawing, w, h) in mm, origin top-left."""
+    units = []
+    for part in plist:
+        for u in sorted(k for k in part['units'] if k != 0) or [1]:
+            units.append(_unit_geometry(part, u))
+    count = {}
+    for un in units:
+        for g in un['geo']:
+            if g['net'] and g['net'] not in netlist.POWER and not g['offgrid']:
+                count[g['net']] = count.get(g['net'], 0) + 1
+    routed = {n for n, c in count.items() if c >= 2}
+    leaving = routed       # every routed net keeps one label: its name, and the PCB's net name
+    labelled = set()
+    # one label per routed net, on a horizontal pin of a part other than a connector where
+    # possible (a connector's closely spaced pins need their way out for the wires)
+    cand = sorted(((un['part']['ref'].startswith('J'), g['dy'] != 0, i, g)
+                   for i, un in enumerate(units) for g in un['geo']), key=lambda t: t[:3])
+    for *_, g in cand:
+        n = g['net']
+        if n in leaving and n not in labelled:
+            g['label'] = True
+            labelled.add(n)
+    for un in units:
+        for g in un['geo']:
+            n = g['net']
+            if n and n not in netlist.POWER and (n not in routed or g['offgrid']):
+                g['label'] = True
+
+    # unit extents (cells, relative to the unit origin) including stubs, labels, fields
+    for un in units:
+        ox, oy = un['off']
+        xs, ys = [], []
+        b = un['body']
+        xs += [(b[0] + ox) / GRID, (b[2] + ox) / GRID]
+        ys += [(b[1] + oy) / GRID, (b[3] + oy) / GRID]
+        for g in un['geo']:
+            tx, ty = (g['px'] + ox) / GRID, (g['py'] + oy) / GRID
+            ext = 1
+            if g.get('label'):
+                ext += _label_len(g['net'])
+            elif g['net'] in netlist.POWER:
+                ext += 2
+            xs += [tx, tx + g['dx'] * ext]
+            ys += [ty, ty + g['dy'] * ext]
+            if g.get('label') and g['dx'] == 0:
+                xs += [tx - 1, tx + 1]
+            if g.get('label') and g['dy'] == 0:
+                ys += [ty - 1]
+        ref, val = un['part']['ref'], un['part']['value']
+        bb = (min(xs) * GRID, min(ys) * GRID, max(xs) * GRID, max(ys) * GRID)
+        rf, vf, grown = field_layout(un['geo'], bb, b, ref, val)
+        un['fields'] = rf, vf
+        tw = max(len(ref), len(val)) * CHAR_W / 2
+        un['ext'] = (grown[0] / GRID - tw / GRID, grown[1] / GRID, grown[2] / GRID + tw / GRID,
+                     grown[3] / GRID)
+
+    # order: greedy chain by shared routed nets, starting from the most connected unit
+    def nets(un):
+        return {g['net'] for g in un['geo'] if g['net'] in routed}
+    order, rest = [], units[:]
+    if rest:
+        cur = max(rest, key=lambda un: len(nets(un)))
+        while rest:
+            rest.remove(cur)
+            order.append(cur)
+            if not rest:
+                break
+            placed = set().union(*(nets(u) for u in order))
+            cur = max(rest, key=lambda un: (len(nets(un) & nets(order[-1])),
+                                            len(nets(un) & placed), -units.index(un)))
+
+    # rows of units, each unit origin on a whole cell
+    maxw = _cells(GROUP_MAXW)
+    x = y = MARGIN
+    row_h = 0
+    for un in order:
+        x1, y1, x2, y2 = un['ext']
+        w, h = x2 - x1, y2 - y1
+        if x > MARGIN and x + w > maxw:
+            x, y, row_h = MARGIN, y + row_h + GAP, 0
+        un['cx'], un['cy'] = int(math.ceil(x - x1)), int(math.ceil(y - y1))
+        x = un['cx'] + x2 + GAP
+        row_h = max(row_h, un['cy'] + y2 - y)
+
+    grid = schroute.Grid()
+    pins = {}
+    for un in order:
+        ox, oy = un['off']
+        cx, cy = un['cx'], un['cy']
+        b = un['body']
+        bx1, bx2 = math.ceil((b[0] + ox) / GRID - 0.01), math.floor((b[2] + ox) / GRID + 0.01)
+        by1, by2 = math.ceil((b[1] + oy) / GRID - 0.01), math.floor((b[3] + oy) / GRID + 0.01)
+        grid.block_rect(cx + bx1, cy + by1, cx + bx2, cy + by2)
+        for (fx, fy, fj), txt in zip(un['fields'], (un['part']['ref'], un['part']['value'])):
+            w = len(txt) * CHAR_W / GRID
+            xa = fx / GRID if fj == 'left' else fx / GRID - w / 2
+            grid.block_rect(cx + math.floor(xa), cy + _cells(fy) - 1,
+                            cx + math.ceil(xa + w), cy + _cells(fy))
+        for g in un['geo']:
+            tip = (cx + _cells(g['px'] + ox), cy + _cells(g['py'] + oy))
+            d = (g['dx'], g['dy'])
+            for k in range(1, max(1, _cells(g['len'])) + 1):      # the pin itself
+                grid.block((tip[0] - d[0] * k, tip[1] - d[1] * k))
+            g['tip'] = tip
+            if g['net'] is None:
+                grid.block(tip)
+                continue
+            end = (tip[0] + d[0], tip[1] + d[1])
+            g['end'] = end
+            if g['offgrid']:
+                grid.block(tip)
+                grid.block(end)
+            else:
+                grid.stub(g['net'], tip, end)
+                grid.block(tip)                       # wires join a pin at its stub end only
+            if g.get('label'):
+                n = int(math.ceil(_label_len(g['net'])))
+                for k in range(1, n + 1):
+                    grid.block((end[0] + d[0] * k, end[1] + d[1] * k))
+            elif g['net'] in netlist.POWER:
+                for k in (1, 2):
+                    grid.block((end[0] + d[0] * k, end[1] + d[1] * k))
+            if g['net'] in routed and not g['offgrid']:
+                pins.setdefault(g['net'], []).append(g)
+
+    xs = [un['cx'] + un['ext'][2] for un in order] + [0]
+    ys = [un['cy'] + un['ext'][3] for un in order] + [0]
+    bounds = (0, 0, int(max(xs)) + MARGIN, int(max(ys)) + MARGIN)
+
+    def span(n):
+        c = [g['end'] for g in pins[n]]
+        return max(p[0] for p in c) - min(p[0] for p in c) + max(p[1] for p in c) - min(p[1] for p in c)
+
+    failed = []
+    joined = {}
+    for n in sorted(pins, key=span):
+        first = pins[n][0]
+        tree = {first['end']}                         # the part of the net joined so far
+        joined[n] = [first]
+        todo = pins[n][1:]
+        while todo:
+            todo.sort(key=lambda g: min(abs(g['end'][0] - c[0]) + abs(g['end'][1] - c[1]) for c in tree))
+            g = todo.pop(0)
+            path = grid.route(n, g['end'], (g['dx'], g['dy']), bounds, tree)
+            if path:
+                grid.commit(n, path)
+                tree |= set(path)
+                joined[n].append(g)
+            else:
+                failed.append(g)
+    for g in failed:                                  # unroutable: fall back to labels
+        g['label'] = True
+        if not any(h.get('label') for h in joined[g['net']]):
+            joined[g['net']][0]['label'] = True       # the wired part needs its label too
+
+    wires, junctions = grid.segments()
+    cells = [c for _, a, b in wires for c in (a, b)]
+    w = max([bounds[2]] + [c[0] + MARGIN for c in cells]) * GRID
+    h = max([bounds[3]] + [c[1] + MARGIN for c in cells]) * GRID
+    return dict(units=order, wires=wires, junctions=junctions, failed=len(failed)), w, h
+
+
+def _emit_group(sheet, path, grp, gx, gy):
+    for un in grp['units']:
+        part, u = un['part'], un['unit']
+        ox, oy = gx + un['cx'] * GRID + un['off'][0], gy + un['cy'] * GRID + un['off'][1]
+        sym_instance(sheet, path, part['lib'], part['ref'], part['value'], u, ox, oy, part['fp'],
+                     un['fields'], in_bom=part['lib'] not in ('Connector:TestPoint',
+                                                             'Mechanical:MountingHole'))
+        for g in un['geo']:
+            tx, ty = gx + g['tip'][0] * GRID, gy + g['tip'][1] * GRID
+            if g['offgrid']:                          # exact tip, stub drawn here
+                tx, ty = ox + g['px'], oy + g['py']
+            if g['net'] is None:
+                no_connect(sheet, tx, ty)
+                continue
+            ex, ey = gx + g['end'][0] * GRID, gy + g['end'][1] * GRID
+            if g['offgrid']:
+                ex, ey = tx + g['dx'] * STUB, ty + g['dy'] * STUB
+                wire(sheet, tx, ty, ex, ey)
+            if g['net'] in netlist.POWER:
+                place_power(sheet, path, g['net'], ex, ey, g['dx'], g['dy'])
+            elif g.get('label'):
+                label(sheet, g['net'], ex, ey, g['dx'], g['dy'])
+    for net, a, b in grp['wires']:
+        wire(sheet, gx + a[0] * GRID, gy + a[1] * GRID, gx + b[0] * GRID, gy + b[1] * GRID)
+    for net, c in grp['junctions']:
+        x, y = gx + c[0] * GRID, gy + c[1] * GRID
+        sheet.add(f'(junction (at {f(x)} {f(y)}) (diameter 0) (color 0 0 0 0) '
+                  f'(uuid {q(uid("junction", sheet.name, x, y))}))')
+
+
+GROUP_MAXW = 200.0
+GROUP_BOXES = []       # where each group landed (mm), for tools/schimg.py
+
+
+def notes_bottom(s, y):
+    """Y just below a notes text block starting at y."""
+    return snap(y + (s.count('\n') + 1) * 1.27 * 1.65 + 10.16)
+
+
+def layout_wired(sheet, path, plist, x0=20.32, y0=25.4):
+    """Group by group, wired; shelf-pack the groups on the smallest paper that fits."""
+    global TOTAL, GROUP_MAXW
+    TOTAL = TOTAL or _pin_counts()
+    groups = {}
+    for part in plist:
+        groups.setdefault(part['group'], []).append(part)
+    for paper in sheet.paper_choices:
+        W, H = PAPERS[paper]
+        GROUP_MAXW = min(W - 2 * x0, 280.0)
+        built = [(name, *_group(parts)) for name, parts in groups.items()]
+        # shelf-pack the groups (each with a 7.62 mm heading)
+        x, y, row_h, place = x0, y0, 0, []
+        for name, grp, w, h in built:
+            if x > x0 and x + w > W - x0:
+                x, y, row_h = x0, y + row_h + 5.08, 0
+            place.append((name, grp, snap(x), snap(y)))
+            x += w + 10.16
+            row_h = max(row_h, h + 7.62)
+        if y + row_h < H - 45 or paper == sheet.paper_choices[-1]:
+            break
+    sheet.paper = paper
+    failed = 0
+    for (name, grp, gx, gy), (_, _, w, h) in zip(place, built):
+        text(sheet, name, gx, gy, 2.54, True)
+        _emit_group(sheet, path, grp, gx, gy + 7.62)
+        failed += grp['failed']
+        GROUP_BOXES.append(dict(sheet=sheet.file, group=name, x=gx, y=gy, w=w, h=h + 7.62))
+    print(f'{sheet.name}: {paper}, {failed} connections left as labels', file=sys.stderr)
+
+
 def lib_symbols(ids):
     out = []
     for lid in sorted(ids):
@@ -296,7 +577,8 @@ def write_sheet(path, sheet, root_uuid, extra='', comments=(), sheet_instances=T
 
 
 NOTES_MAIN = """Generated from docs/ac30_schematica.jpg (SWTPC AC-30 Cassette Tape Switching Schematic),
-docs/AC30-BOM.md and docs/ac30_wiring1a.jpg. Connectivity is by net label: identical labels are connected.
+docs/AC30-BOM.md and docs/ac30_wiring1a.jpg. Each block is wired; net labels join the blocks and sheets
+(identical labels are connected).
 Transcription notes / assumptions:
  - Drawing pin-number slips corrected to the real pinouts: IC7D drawn 8->9 (4049: 9->10);\n   IC13C drawn inputs 7,8 (4070: 8,9).
  - 4053 INH (pin 6) and VEE (pin 7) are not shown on the drawing; tied to GND.
@@ -321,7 +603,7 @@ G6K-2F-Y (5 V coil, DPDT 1 A, both poles in parallel as the motor contact) inste
 6 V SIL reed relays; check the coil polarity mark (pin 1 to RELAY_x)."""
 
 NOTES_SUB = """Generated from docs/ac30_mod_demod.pdf (SWTPC AC-30 Cassette Tape Modulator/Demodulator
-Schematic). Connectivity is by net label: identical labels are connected.
+Schematic). Each block is wired; net labels join the blocks and sheets (identical labels are connected).
 Transcription notes / assumptions:
  - IC4 (4558) supply pins are not drawn. The assembly manual says IC4 runs from the +/-7.5 V
    zener rails (D12/D13 on the power supply sheet).
@@ -390,8 +672,10 @@ def main(outdir):
     title = 'SWTPC AC-30 Cassette Interface - Switching' + (' (SMT)' if netlist.SMT else '')
     root = Sheet('main', f'{PROJECT}.kicad_sch', title, ['A1', 'A0'])
     root_path = '/' + root.uuid
-    layout(root, root_path, [p for p in netlist.parts if p['sheet'] == 'main'], wired=True, y0=60)
-    text(root, NOTES_MAIN + (NOTES_SMT if netlist.SMT else ''), 20.32, 20.32)
+    notes = NOTES_MAIN + (NOTES_SMT if netlist.SMT else '')
+    layout_wired(root, root_path, [p for p in netlist.parts if p['sheet'] == 'main'],
+                 y0=notes_bottom(notes, 20.32))
+    text(root, notes, 20.32, 20.32)
 
     W, H = PAPERS[root.paper]
     sheet_syms, project_sheets = [], [[root.uuid, 'Root']]
@@ -399,7 +683,8 @@ def main(outdir):
         sub = Sheet(key, file, title, ['A3', 'A2', 'A1'])
         sheet_uuid = uid('sheetsym', key)
         sub_path = f'/{root.uuid}/{sheet_uuid}'
-        layout(sub, sub_path, [p for p in netlist.parts if p['sheet'] == key], wired=True, y0=60)
+        layout_wired(sub, sub_path, [p for p in netlist.parts if p['sheet'] == key],
+                     y0=max(60, notes_bottom(globals()[notes], 15.24)))
         text(sub, globals()[notes], 20.32, 15.24)
         if key == 'psu':
             # +5V is driven by IC16's output; the other rails only by diodes and zeners,
@@ -431,6 +716,8 @@ def main(outdir):
                                                                         "version": 3}}
     data['sheets'] = project_sheets
     json.dump(data, open(pro, 'w'), indent=2)
+    if os.environ.get('AC30_GROUPS_JSON'):
+        json.dump(GROUP_BOXES, open(os.environ['AC30_GROUPS_JSON'], 'w'), indent=1)
     print('main sheet paper', root.paper)
 
 
