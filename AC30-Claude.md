@@ -1,6 +1,6 @@
 # AC-30 KiCad Schematic: Claude Code Session Log
 
-Session dates: 2026-10-08 to 2026-10-10 (sections 1–16 on the 8th, 17–42 on the 9th, 43–70 on the 10th). Model: Claude Opus 5.5 (Claude Code CLI).
+Session dates: 2026-10-08 to 2026-10-10 (sections 1–16 on the 8th, 17–42 on the 9th, 43–72 on the 10th, 73–75 on the 11th). Model: Claude Opus 5.5 (Claude Code CLI).
 
 This is a record of the chat that produced the KiCad project in `kicad/`. User messages are reproduced exactly, typos included. Claude's answers are in full for sections 1–3 and condensed from section 4 on. Claude's intermediate tool work (shell commands, image crops, file edits) is summarized rather than shown verbatim.
 
@@ -1047,7 +1047,86 @@ Added one sentence to the README's 2026/10/10 note: the motor and relay lines no
 
 ### Claude's answer
 
-Added sections 69–70, committed and pushed.
+Added sections 69–70, committed `afb6fc9` and pushed (`77b0c25..afb6fc9`).
+
+---
+
+## 71. User
+
+> Are there any problems
+
+### Claude's answer (condensed)
+
+There were 17 open problems; four were already fixed: the through-hole routing, the early stop, the ground fill, and the Power-class motor/relay tracks. Grouped list:
+- **Check before ordering:** no Gerber viewer or DFM check yet; the transcription assumptions; R39; the SMT substitutions; position-file rotations.
+- **Board design:** enclosure fit, audio lines crossing the board, tracks under the labels, solid-connected GND pads, the TO-92 ring, 3D models.
+- **Tools:** noisy diffs, KiCad 10 format, reloading boards after a build, the leftover AppImage mount.
+- **Documentation:** the README pointed to the out-of-date list in section 58.
+
+---
+
+## 72. User
+
+> add a known-issues file, update README, commit & push
+
+### Claude's answer (condensed)
+
+Added `KNOWN-ISSUES.md`: the open issues grouped as above, with the transcription assumptions in a table, plus a Resolved table. The README's known-issues pointer now leads there. Committed `a63779e` and pushed (`afb6fc9..a63779e`).
+
+(The user then committed `ee3fa67`, "Adds Red/Blue pdf": `docs/AC30-SMT-Blue.pdf`, `AC30-SMT-Components.pdf`, `AC30-SMT-Red.pdf`.)
+
+---
+
+## 73. User
+
+> Can you convert the SMT Schematic into a human readable schematic image?
+
+### Work done (summary)
+
+1. **The starting point.** The exported SMT schematic was correct but hard to read: A0 sheets of parts placed one by one, every pin a short stub and a net label, almost no wires.
+2. **Asked one question.** The choices were a wired schematic, a block diagram plus page images, or plain exports. The user chose the **wired schematic**.
+3. **New router `kicad/tools/schroute.py`.** It works on the 2.54 mm grid and follows KiCad's connection rules:
+   - wires of different nets cross only straight through each other, and never overlap, bend, end or branch on another net's cell;
+   - no wire passes through a body, pin, label or power symbol;
+   - each net is grown as one tree from its first pin;
+   - junctions go where three or more wires meet.
+4. **Layout in `gen.py`.** Each functional group is laid out on its own: units in rows ordered by shared nets, and every net with two or more pins in the group routed as wires.
+   - Every routed net keeps one label (its name, matching the PCB's net names), preferably on a part other than a connector.
+   - Unroutable connections fall back to label pairs: 16 on the main sheet, 1 on mod/demod, out of all the nets.
+   - Groups are shelf-packed below the notes.
+   - The front-panel jumper pads moved into the front-panel group.
+   - Pins off the 2.54 mm grid keep a stub and a label. The custom 1488/1489 output pins were moved onto the grid; the drawn symbol is unchanged.
+5. **Bugs found on the way:**
+   - Pins joined each other's stubs instead of one tree, which split nets.
+   - KiCad auto-named the label-less nets, which broke the PCB's net names.
+   - Wires ended on pin tips from the side, leaving dangling stubs.
+   - Label and power-symbol blocking boxed in J1's dense pins.
+   - A failed net's first pin had no label, which dropped J1.14/J1.15.
+6. **Images.** `kicad/tools/schimg.py` cuts PNGs of each sheet and each functional block from `kicad-cli sch export pdf`, using block positions recorded by `gen.py`. `build.sh` writes them to `<project dir>/schematic/` for both boards.
+7. **Checks.**
+   - Pin-to-net maps are identical to the previous schematics for both variants.
+   - ERC 0.
+   - Both PCBs DRC/parity clean, with tracks, footprints and pads unchanged; only the copper-fill point order differed, so the committed boards were kept.
+
+---
+
+## 74. User
+
+> ok, finish it and then commit and push
+
+### Work done (summary)
+
+Docs: a "Schematic images" section in both settings documents, a README pointer to `kicad-smt/schematic/` and `kicad/schematic/`, and the label pairs as a new item in `KNOWN-ISSUES.md` (the old schematics moved to Resolved). Committed `bce1247` and pushed (`ee3fa67..bce1247`). The SMT schematic was open in KiCad, so the user was asked to reload it before saving.
+
+---
+
+## 75. User
+
+> update AC30-Claude.md with this session, commit and push
+
+### Claude's answer
+
+Added sections 71–75, committed and pushed.
 
 ---
 
@@ -1062,10 +1141,11 @@ Added sections 69–70, committed and pushed.
 | PCB, SMT (`kicad-smt/AC30_SMT.*`) | 173.0 × 88.5 mm, 2 layers, SMT except the KK-396 connectors, wire pads and mounting holes, fully routed, GND fill on both layers; ERC, DRC and parity clean |
 | Connectors | J3–J5 match the original artwork; J12 is the power input; the front panel wires to through-hole pads J1 SWITCHES, J2 LEDS, J13 MOTOR, J14 MIC, J15 EAR (both boards) |
 | Mounting holes | 4 × 3.2 mm, 6.35 mm in from each corner |
-| Git | `main` = `origin/main` (pushed after section 70); root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
+| Git | `main` = `origin/main` (pushed after section 75); root `.gitignore` covers KiCad local history, lock, autosave and backup files; `kicad/AC30.step` is tracked |
 | Build | `cd kicad && tools/build.sh` (through-hole) or `tools/build.sh smt` (SMT): regenerate, ERC, BOM export, place (seeds tried in turn until routing is clean: 31 through-hole, 30 SMT), route (retries plus targeted finishing passes), GND fill (`tools/zones.py`), DRC, STEP export, FreeCAD check, Gerbers and drill files (`tools/gerbers.sh`) |
 | Tools | KiCad 10.0.7 AppImage, FreeRouting 2.4.1 (bundled Java 25), FreeCAD 26.3.0 AppImage |
-| Reference | `AC30-settings.md` and `AC30-SMT-settings.md`: rules, drill table, holes, connectors and wire pads, placement; `docs/AC30-BOM.md` and the KiCad BOM CSVs |
+| Schematics | Wired block by block (`tools/schroute.py`); PDF and PNG images in `kicad/schematic/` and `kicad-smt/schematic/` |
+| Reference | `KNOWN-ISSUES.md`; `AC30-settings.md` and `AC30-SMT-settings.md`: rules, drill table, holes, connectors and wire pads, placement; `docs/AC30-BOM.md` and the KiCad BOM CSVs |
 | Fabrication | `kicad/gerbers/` + `kicad/AC30-gerbers.zip`; `kicad-smt/gerbers/` + `kicad-smt/AC30_SMT-gerbers.zip`; SMT pick-and-place `kicad-smt/AC30_SMT-top-pos.csv` (origin bottom-left) |
 | Not placed | R39 (200K DELAY trimmer), which is on no schematic |
 
