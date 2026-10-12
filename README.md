@@ -64,9 +64,9 @@ I then found out I needed to upgrade Kicad to 10.7 and FreeCAD 26.3 so Claude co
 
 I'd estimate the size of the new PCB to be about 3.5" x 7" (inches).
 
-![New AC30 Cassette Interface part placement](images/AC30-PCB-Parts.png)
+![New AC30 Cassette Interface SMT part placement](images/AC30-PCB-SMT-Parts.png)
 
-![New AC30 Cassette Interface Red/Blue](images/AC30-PCB-Red-Blue.png)
+![New AC30 Cassette Interface SMT Red/Blue](images/AC30-PCB-SMT-Red-Blue.png)
 
 So after several hours, including the Kicad/FreeCAD SNAFU, those are the results. The TPx are where I just dumped a bunch of jumpers I hadn't decided on. I'll fix those later. While it's not done it's a huge jump. It would have taken me about two weeks to get all the parts on the schematic, connections defined and PCB routed.
 
