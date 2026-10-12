@@ -6,21 +6,23 @@ A reproduction SWTPC AC-30 Cassette Interface
 ## Description
 
 I have a couple of Motorola MC6800, MC6802, and MC6809 machines from the 1970's. And I wanted to
-setup a typical cassette plater/recorder setup to save and load code written on these machines.
+setup a typical cassette player/recorder setup to save and load code written on these machines.
 
-**Note:**2026/10/11 - The schematics are now drawn with real wires, block by block, instead of a label on every pin. Readable PDFs and PNG images of every sheet and functional block are in [kicad-smt/schematic/](kicad-smt/schematic) (SMT) and [kicad/schematic/](kicad/schematic) (through-hole), for example the SMT modulator:
+**Note:** 2026/10/11 - I hate the way Claude built the human readable schematics. A lot of net lists instead of a nice arrow to the net list. Anyway, so after a bit of double checking I've ordered 5 SMT boards and we'll now see the quality of the designs.
+
+2026/10/11 - The schematics are now drawn with real wires, block by block, instead of a label on every pin. Readable PDFs and PNG images of every sheet and functional block are in [kicad-smt/schematic/](kicad-smt/schematic) (SMT) and [kicad/schematic/](kicad/schematic) (through-hole), for example the SMT modulator:
 
 ![SMT schematic: modulator block](kicad-smt/schematic/AC30_SMT-07-Modulator.png)
 
-2026/10/10 - Both boards (through-hole `kicad/AC30` and SMT `kicad-smt/AC30_SMT`) now wire the front panel (switches, LEDs, motor jacks, MIC A/B and EAR A/B jacks) to labelled through-hole wire pads instead of the J1/J2 Molex connectors. Board details are in [AC30-settings.md](AC30-settings.md) and [AC30-SMT-settings.md](AC30-SMT-settings.md); the parts list is [docs/AC30-BOM.md](docs/AC30-BOM.md), with KiCad BOMs in `kicad/AC30-BOM.csv` and `kicad-smt/AC30_SMT-BOM.csv`.
+2026/10/10 - Both boards (through-hole `kicad/AC30` and SMT `kicad-smt/AC30_SMT`) now wire the front panel (switches, LEDs, motor jacks, MIC A/B and EAR A/B jacks) to labeled through-hole wire pads instead of the J1/J2 Molex connectors. Board details are in [AC30-settings.md](AC30-settings.md) and [AC30-SMT-settings.md](AC30-SMT-settings.md); the parts list is [docs/AC30-BOM.md](docs/AC30-BOM.md), with Kicad BOMs in `kicad/AC30-BOM.csv` and `kicad-smt/AC30_SMT-BOM.csv`.
 
 Board sizes are now 173.0 x 126.5 mm (6.8" x 5.0") through-hole and 173.0 x 88.5 mm (6.8" x 3.5") SMT. Gerbers and drill files for both boards are ready for the board house: [kicad/AC30-gerbers.zip](kicad/AC30-gerbers.zip) (through-hole) and [kicad-smt/AC30_SMT-gerbers.zip](kicad-smt/AC30_SMT-gerbers.zip) (SMT, including the top paste layer for a stencil). `kicad/tools/build.sh` regenerates them on every build, or run `kicad/tools/gerbers.sh` (add `smt` for the SMT board).
 
 The SMT board also has a pick-and-place position file, [kicad-smt/AC30_SMT-top-pos.csv](kicad-smt/AC30_SMT-top-pos.csv) (SMD parts only, mm, origin at the board's bottom-left corner), to go with the BOM for an assembly house. The through-hole board's layout was re-placed so a fresh build routes completely again; the build now tries other placements automatically if routing ever comes up short. Both boards now have a GND copper fill on both layers (thermal reliefs on the GND pads, so they're still easy to hand-solder; details in the settings files above), added automatically by the build after routing. The motor and relay lines (MOTOR_1A/1B/2A/2B, RELAY_1/2) now use the same 0.6 mm tracks as the power rails, good for roughly 1.5 A. Known issues, including what to check before ordering boards, are listed in [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
 
-2026/10/09 - I've update the PCB to add the mod/demod circuits and a molex for the power. Additionally I had a new SMT version created.
+2026/10/09 - I've update the PCB to add the mod/demod circuits and a Molex for the power. Additionally I had a new SMT version created.
 
-2026/10/08 - This is my first go around with Claude, Kicad and FreeCAD and creating a PCB to be sent off as gerbers. I have a lot of inspecting to do. But for a 1st go this is scary impressive.
+2026/10/08 - This is my first go around with Claude, Kicad and FreeCAD and creating a PCB to be sent off as Gerbers. I have a lot of inspecting to do. But for a 1st go this is scary impressive.
 
 ## Claude created Kicad files
 
@@ -58,7 +60,7 @@ I gave it the [AC30/docs/AC30-BOM.md](BOM) file (simple markdown text file).
 
 Claude started churning and created a 'schematic' (doesn't look like the above, hard to read) and I imported it into the PCB editor. Then didn't make any changes. Instead I let Claude do the rerouting.
 
-I then found out I needed to upgrade Kicad to 10.7 and FreeCAD 26.3 so Claude could create Python 3.11 scripts to build a schematic, the PCB and routing. That was messy as I have Debian Trixie and the latest wants Debian Forky. Anyway, this is the final 1st round attempt. More cleanup to do yet before I ship off the gerbers.
+I then found out I needed to upgrade Kicad to 10.7 and FreeCAD 26.3 so Claude could create Python 3.11 scripts to build a schematic, the PCB and routing. That was messy as I have Debian Trixie and the latest wants Debian Forky. Anyway, this is the final 1st round attempt. More cleanup to do yet before I ship off the Gerbers.
 
 I'd estimate the size of the new PCB to be about 3.5" x 7" (inches).
 
